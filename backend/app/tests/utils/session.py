@@ -1,4 +1,4 @@
-from datetime import date, time, datetime
+import datetime as dt
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,12 +9,12 @@ from app.models import Session
 from app.tests import utils as ut
 
 
-async def create_random_session(db: AsyncSession, date_: date = None, time_: time = None,
+async def create_random_session(db: AsyncSession, date_: dt.date = None, time_: dt.time = None,
                                 participant_id: int = None) -> Session:
     if date_ is None:
-        date_ = date.today()
+        date_ = dt.date.today()
     if time_ is None:
-        time_ = datetime.now().time()
+        time_ = dt.datetime.now().time()
     if participant_id is None:
         participant_id = (await ut.create_random_participant(db)).id
     s_type = ut.random_list_elem(settings.SESSION_TYPES)

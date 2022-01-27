@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+import datetime as dt
 from typing import Any, Union
 
 from jose import jwt
@@ -12,11 +12,11 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ALGORITHM = "HS256"  # algorithm used to sign the JWT token
 
 
-def create_access_token(subject: Union[str, Any], expires_delta: timedelta = None) -> str:
+def create_access_token(subject: Union[str, Any], expires_delta: dt.timedelta = None) -> str:
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = dt.datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(
+        expire = dt.datetime.utcnow() + dt.timedelta(
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
     to_encode = {"exp": expire, "sub": str(subject)}

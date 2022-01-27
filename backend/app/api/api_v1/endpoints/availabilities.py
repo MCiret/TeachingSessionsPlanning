@@ -19,7 +19,7 @@ async def read_availabilities_mine(
     Read all current speaker availabilities.
     **Allowed for speaker user only.**
     """
-    return await crud.availability.get_by_speaker(db, speaker_id=current_user.id)
+    return await crud.availability.get_by_speaker(db, current_user.id)
 
 
 @router.get("", response_model=list[schemas.Availability])
@@ -45,7 +45,7 @@ async def read_availabilities_by_speaker(
                 status_code=404,
                 detail="A speaker with this id does not exist in the system...",
             )
-    return await crud.availability.get_by_speaker(db, speaker_id=speaker_id)
+    return await crud.availability.get_by_speaker(db, speaker_id)
 
 
 @router.post("", response_model=schemas.Availability)
@@ -71,7 +71,7 @@ async def create_availability(
                             f"= {from_weekday_int_to_str(avail_in.week_day)} a weekday that does not exists "
                             f"between {avail_in.start_date} and {avail_in.end_date}.")
                 )
-    if await crud.availability.is_same_period_weekday_time_exists(db, speaker_id=current_user.id, obj_in=avail_in):
+    if await crud.availability.is_same_weekday_time_period_speaker(db, speaker_id=current_user.id, obj_in=avail_in):
         raise HTTPException(
                     status_code=400,
                     detail=(f"Sorry, cannot create because at least one availability already exists on a "

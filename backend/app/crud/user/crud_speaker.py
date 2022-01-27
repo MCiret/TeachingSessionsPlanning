@@ -20,29 +20,35 @@ class CRUDSpeaker(CRUDUser[Speaker, SpeakerCreate, SpeakerUpdate]):
                                  .join(part, part.speaker_id == self.model.id)
                                  .where(part.id == participant_id))).scalar()
 
-    async def get_day_free_time(self, db: AsyncSession, *, db_obj: Speaker, date: dt.date) -> dict[str, dt.datetime]:
-        day_sessions_spk = [session for session in await crud.session.get_by_speaker_email(db, email=db_obj.email)
-                            if session.date == date]
-        # build a list with all speaker's sessions start times
-        # adding also "start time" of the Xth session for a participant having nb_session_week = X.
-        # ==> 1 speaker's session with a 2 session_week participant <=> 2 consecutive start times added in the list
+    async def get_sessions_times_by_date(self, db: AsyncSession, db_obj: Speaker, date: dt.date) -> list[dt.time]:
+        """
+        Return a list with all date speaker's sessions start times (with 2 consecutive start times for a session
+        with a participant having 2 sessions week..).
+        """
+        spk_date_sessions = await crud.session.get_by_date_speaker(db, speaker_id=db_obj.id, date=date)
+        # build a list with all date speaker's sessions start times (with 2 consecutives start times for a session
+        # with a participant having 2 sessions week..)
         day_sessions_start_times = []
-        for session in day_sessions_spk:
+        for session in spk_date_sessions:
             day_sessions_start_times.append(session.time)
-            nb_session_participant = await crud.participant.get_nb_session_week(db, id=session.participant_id)
-            if nb_session_participant > 1:
-                for i in range(nb_session_participant):
+            part_nb_sess_week = await crud.participant.get_nb_session_week(db, id=session.participant_id)
+            if part_nb_sess_week > 1:
+                for i in range(1, part_nb_sess_week):
                     day_sessions_start_times.append((dt.datetime.combine(session.date, session.time)
-                                                     + dt.timedelta(minutes=db_obj.slot_time * nb_session_participant))
+                                                     + dt.timedelta(minutes=db_obj.slot_time * i))
                                                     .time())
+        return day_sessions_start_times
 
-        real_day_availabilities = []
-        for availability in await crud.availability\
-                                      .get_by_day_and_speaker_email(db, speaker_email=db_obj.email, day=date):
-            if availability.time not in day_sessions_start_times:
-                real_day_availabilities.append(availability.time)
+    async def get_free_sessions_times_by_date(self, db: AsyncSession, db_obj: Speaker, date: dt.date) -> list[dt.time]:
+        spk_date_sessions_times_list = await self.get_sessions_times_by_date(db, db_obj, date)
+        spk_date_avails_times_list = await crud.availability.get_times_list_by_date_speaker(db, db_obj.id, date)
 
-        return real_day_availabilities
+        spk_date_free_sessions_times = []
+        for av_time in spk_date_avails_times_list:
+            if av_time not in spk_date_sessions_times_list:
+                spk_date_free_sessions_times.append(av_time)
+
+        return spk_date_free_sessions_times
 
 
 speaker = CRUDSpeaker(Speaker)

@@ -34,5 +34,5 @@ class Participant(User):
     }
 
     def __repr__(self):
-        return super().__repr__() + (f"Participant(id={self.id!r}, status={self.status_id!r}, "
-                                     f"type={self.type_id!r}, speaker={self.speaker_id!r})")
+        return super().__repr__() + (f"Participant(id={self.id!r}, status_id={self.status_id!r}, "
+                                     f"type_id={self.type_id!r}, speaker_id={self.speaker_id!r})")

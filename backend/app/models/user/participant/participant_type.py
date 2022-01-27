@@ -14,3 +14,6 @@ class ParticipantType(Base):
     name = Column(String, index=True, nullable=False, unique=True)
     nb_session_week = Column(Integer, index=True, nullable=False)
     participants = relationship("Participant", back_populates="type")
+
+    def __repr__(self):
+        return (f"ParticipantType(id={self.id!r}, name={self.name!r}, nb_session_week={self.nb_session_week!r})")

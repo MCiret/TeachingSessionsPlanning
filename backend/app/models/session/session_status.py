@@ -13,3 +13,6 @@ class SessionStatus(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True, nullable=False, unique=True)
     sessions = relationship("Session", back_populates="status")  # many to one
+
+    def __repr__(self):
+        return (f"SessionStatus(id={self.id!r}, name={self.name!r})")

@@ -1,12 +1,12 @@
-from datetime import datetime, timedelta, date, time
+import datetime as dt
 
 
-def add_time(date: date, time: time, minutes_to_add: int) -> time:
-    return (datetime.combine(date, time) + timedelta(minutes=minutes_to_add)).time()
+def add_time(date: dt.date, time: dt.time, minutes_to_add: int) -> dt.time:
+    return (dt.datetime.combine(date, time) + dt.timedelta(minutes=minutes_to_add)).time()
 
 
-def subtract_time(date: date, time: time, minutes_to_subtract: int) -> time:
-    return (datetime.combine(date, time) - timedelta(minutes=minutes_to_subtract)).time()
+def subtract_time(date: dt.date, time: dt.time, minutes_to_subtract: int) -> dt.time:
+    return (dt.datetime.combine(date, time) - dt.timedelta(minutes=minutes_to_subtract)).time()
 
 
 def from_weekday_int_to_str(weekday_int: int) -> str:

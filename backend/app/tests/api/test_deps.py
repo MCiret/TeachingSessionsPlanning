@@ -158,3 +158,19 @@ async def test_get_current_active_admin_user_not_admin_user(mocker):
         await deps.get_current_active_admin_user()
     assert "The user doesn't have enough privileges" in str(he.getrepr())
     mock_crud_user_is_admin.assert_called_once()
+
+
+async def test_get_current_active_speaker_user_speaker_user(mocker):
+    mock_crud_user_is_speaker = mocker.patch('app.crud.user.is_speaker')
+    mock_crud_user_is_speaker.return_value = True
+    assert await deps.get_current_active_speaker_user()
+    mock_crud_user_is_speaker.assert_called_once()
+
+
+async def test_get_current_active_speaker_user_not_speaker_user(mocker):
+    mock_crud_user_is_speaker = mocker.patch('app.crud.user.is_speaker')
+    mock_crud_user_is_speaker.return_value = False
+    with pytest.raises(HTTPException) as he:
+        await deps.get_current_active_speaker_user()
+    assert "To do this, the user has to be a Speaker user" in str(he.getrepr())
+    mock_crud_user_is_speaker.assert_called_once()

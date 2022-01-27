@@ -1,4 +1,4 @@
-from datetime import date, time, timedelta
+import datetime as dt
 
 import pytest
 from httpx import AsyncClient
@@ -23,60 +23,60 @@ class TestEndpointsAvailabilities:
 
         speaker1 = await ut.create_random_speaker(db_tests, slot_time=30)
         avail1_spk1 = await crud.availability.create(db_tests,
-                                                     obj_in=AvailabilityCreate(start_date=date(2022, 1, 1),
-                                                                               end_date=date(2022, 3, 31),
+                                                     obj_in=AvailabilityCreate(start_date=dt.date(2022, 1, 1),
+                                                                               end_date=dt.date(2022, 3, 31),
                                                                                week_day=1,
-                                                                               time=time(9)),
+                                                                               time=dt.time(9)),
                                                      speaker_id=speaker1.id)
         avail2_spk1 = await crud.availability.create(db_tests,
-                                                     obj_in=AvailabilityCreate(start_date=date(2021, 12, 1),
-                                                                               end_date=date(2022, 5, 31),
+                                                     obj_in=AvailabilityCreate(start_date=dt.date(2021, 12, 1),
+                                                                               end_date=dt.date(2022, 5, 31),
                                                                                week_day=3,
-                                                                               time=time(10)),
+                                                                               time=dt.time(10)),
                                                      speaker_id=speaker1.id)
         avail3_spk1 = await crud.availability.create(db_tests,
-                                                     obj_in=AvailabilityCreate(start_date=date(2021, 12, 1),
-                                                                               end_date=date(2022, 6, 15),
+                                                     obj_in=AvailabilityCreate(start_date=dt.date(2021, 12, 1),
+                                                                               end_date=dt.date(2022, 6, 15),
                                                                                week_day=1,
-                                                                               time=time(9, 30)),
+                                                                               time=dt.time(9, 30)),
                                                      speaker_id=speaker1.id)
         avail4_spk1 = await crud.availability.create(db_tests,
-                                                     obj_in=AvailabilityCreate(start_date=date(2022, 3, 1),
-                                                                               end_date=date(2022, 8, 31),
+                                                     obj_in=AvailabilityCreate(start_date=dt.date(2022, 3, 1),
+                                                                               end_date=dt.date(2022, 8, 31),
                                                                                week_day=4,
-                                                                               time=time(14)),
+                                                                               time=dt.time(14)),
                                                      speaker_id=speaker1.id)
 
         speaker2 = await ut.create_random_speaker(db_tests, slot_time=20)
         avail1_spk2 = await crud.availability.create(db_tests,
-                                                     obj_in=AvailabilityCreate(start_date=date(2022, 1, 1),
-                                                                               end_date=date(2022, 3, 31),
+                                                     obj_in=AvailabilityCreate(start_date=dt.date(2022, 1, 1),
+                                                                               end_date=dt.date(2022, 3, 31),
                                                                                week_day=1,
-                                                                               time=time(11)),
+                                                                               time=dt.time(11)),
                                                      speaker_id=speaker2.id)
         avail2_spk2 = await crud.availability.create(db_tests,
-                                                     obj_in=AvailabilityCreate(start_date=date(2021, 11, 15),
-                                                                               end_date=date(2022, 4, 30),
+                                                     obj_in=AvailabilityCreate(start_date=dt.date(2021, 11, 15),
+                                                                               end_date=dt.date(2022, 4, 30),
                                                                                week_day=1,
-                                                                               time=time(11, 20)),
+                                                                               time=dt.time(11, 20)),
                                                      speaker_id=speaker2.id)
         avail3_spk2 = await crud.availability.create(db_tests,
-                                                     obj_in=AvailabilityCreate(start_date=date(2022, 4, 1),
-                                                                               end_date=date(2022, 8, 31),
+                                                     obj_in=AvailabilityCreate(start_date=dt.date(2022, 4, 1),
+                                                                               end_date=dt.date(2022, 8, 31),
                                                                                week_day=5,
-                                                                               time=time(11, 30)),
+                                                                               time=dt.time(11, 30)),
                                                      speaker_id=speaker2.id)
         avail4_spk2 = await crud.availability.create(db_tests,
-                                                     obj_in=AvailabilityCreate(start_date=date(2022, 2, 15),
-                                                                               end_date=date(2022, 9, 30),
+                                                     obj_in=AvailabilityCreate(start_date=dt.date(2022, 2, 15),
+                                                                               end_date=dt.date(2022, 9, 30),
                                                                                week_day=5,
-                                                                               time=time(12, 30)),
+                                                                               time=dt.time(12, 30)),
                                                      speaker_id=speaker2.id)
         avail5_spk2 = await crud.availability.create(db_tests,
-                                                     obj_in=AvailabilityCreate(start_date=date(2022, 2, 18),
-                                                                               end_date=date(2022, 2, 18),
+                                                     obj_in=AvailabilityCreate(start_date=dt.date(2022, 2, 18),
+                                                                               end_date=dt.date(2022, 2, 18),
                                                                                week_day=4,
-                                                                               time=time(14, 30)),
+                                                                               time=dt.time(14, 30)),
                                                      speaker_id=speaker2.id)
         yield {"speaker1": speaker1,
                "avail1_spk1": avail1_spk1,
@@ -177,26 +177,26 @@ class TestEndpointsAvailabilities:
 
     async def test_create_availability_by_not_speaker(self, async_client: AsyncClient,
                                                       admin_token_headers: dict[str, str]) -> None:
-        data = jsonable_encoder(AvailabilityCreate(start_date=date.today(),
-                                                   end_date=(date.today() + timedelta(days=10)),
-                                                   week_day=0, time=time(10)))
+        data = jsonable_encoder(AvailabilityCreate(start_date=dt.date.today(),
+                                                   end_date=(dt.date.today() + dt.timedelta(days=10)),
+                                                   week_day=0, time=dt.time(10)))
         r = await async_client.post(f"{settings.API_V1_STR}/availabilities", headers=admin_token_headers, json=data)
         assert r.status_code == 400
         assert "To do this, the user has to be a Speaker user" in r.json().values()
 
     async def test_create_availability_enddate_before_startdate(self, async_client: AsyncClient,
                                                                 speaker_token_headers: dict[str, str]) -> None:
-        data = jsonable_encoder(AvailabilityCreate(start_date=date.today(),
-                                                   end_date=(date.today() - timedelta(days=1)),
-                                                   week_day=0, time=time(10)))
+        data = jsonable_encoder(AvailabilityCreate(start_date=dt.date.today(),
+                                                   end_date=(dt.date.today() - dt.timedelta(days=1)),
+                                                   week_day=0, time=dt.time(10)))
         r = await async_client.post(f"{settings.API_V1_STR}/availabilities", headers=speaker_token_headers, json=data)
         assert r.status_code == 400
         assert "Cannot create availability with end_date before start_date..." in r.json().values()
 
     async def test_create_availability_with_wrong_weekday(self, async_client: AsyncClient,
                                                           speaker_token_headers: dict[str, str]) -> None:
-        data = jsonable_encoder(AvailabilityCreate(start_date=date(2022, 2, 2), end_date=date(2022, 2, 6),
-                                                   week_day=0, time=time(10)))
+        data = jsonable_encoder(AvailabilityCreate(start_date=dt.date(2022, 2, 2), end_date=dt.date(2022, 2, 6),
+                                                   week_day=0, time=dt.time(10)))
         r = await async_client.post(f"{settings.API_V1_STR}/availabilities", headers=speaker_token_headers, json=data)
         assert r.status_code == 400
         assert (f"Cannot create availability because {data['week_day']} "
@@ -208,8 +208,8 @@ class TestEndpointsAvailabilities:
         spk1 = db_avails["speaker1"]
         speaker_token_headers = await ut.speaker_authentication_token_from_email(client=async_client,
                                                                                  email=spk1.email, db=db_tests)
-        data = jsonable_encoder(AvailabilityCreate(start_date=date(2021, 12, 15), end_date=date(2022, 2, 18),
-                                                   week_day=1, time=time(9)))
+        data = jsonable_encoder(AvailabilityCreate(start_date=dt.date(2021, 12, 15), end_date=dt.date(2022, 2, 18),
+                                                   week_day=1, time=dt.time(9)))
         r = await async_client.post(f"{settings.API_V1_STR}/availabilities", headers=speaker_token_headers, json=data)
         assert r.status_code == 400
         assert (f"Sorry, cannot create because at least one availability already exists on a "
@@ -221,8 +221,8 @@ class TestEndpointsAvailabilities:
         spk1 = db_avails["speaker1"]
         speaker_token_headers = await ut.speaker_authentication_token_from_email(client=async_client, email=spk1.email,
                                                                                  db=db_tests)
-        data = jsonable_encoder(AvailabilityCreate(start_date=date(2021, 12, 15), end_date=date(2022, 5, 15),
-                                                   week_day=1, time=time(9, 15)))
+        data = jsonable_encoder(AvailabilityCreate(start_date=dt.date(2021, 12, 15), end_date=dt.date(2022, 5, 15),
+                                                   week_day=1, time=dt.time(9, 15)))
         r = await async_client.post(f"{settings.API_V1_STR}/availabilities", headers=speaker_token_headers, json=data)
         assert r.status_code == 400
         assert (f"Sorry, cannot create because at least one availability already exists on a "
@@ -236,8 +236,8 @@ class TestEndpointsAvailabilities:
         spk2 = db_avails["speaker2"]
         speaker_token_headers = await ut.speaker_authentication_token_from_email(client=async_client, email=spk2.email,
                                                                                  db=db_tests)
-        data = jsonable_encoder(AvailabilityCreate(start_date=date(2022, 1, 15), end_date=date(2022, 2, 18),
-                                                   week_day=4, time=time(14, 15)))
+        data = jsonable_encoder(AvailabilityCreate(start_date=dt.date(2022, 1, 15), end_date=dt.date(2022, 2, 18),
+                                                   week_day=4, time=dt.time(14, 15)))
         r = await async_client.post(f"{settings.API_V1_STR}/availabilities", headers=speaker_token_headers, json=data)
         assert r.status_code == 400
         assert (f"Sorry, cannot create because at least one availability already exists on a "
@@ -250,8 +250,8 @@ class TestEndpointsAvailabilities:
         spk1 = db_avails["speaker1"]
         speaker_token_headers = await ut.speaker_authentication_token_from_email(client=async_client, email=spk1.email,
                                                                                  db=db_tests)
-        data = jsonable_encoder(AvailabilityCreate(start_date=date(2022, 6, 16), end_date=date(2022, 8, 31),
-                                                   week_day=1, time=time(9, 30)))
+        data = jsonable_encoder(AvailabilityCreate(start_date=dt.date(2022, 6, 16), end_date=dt.date(2022, 8, 31),
+                                                   week_day=1, time=dt.time(9, 30)))
         r = await async_client.post(f"{settings.API_V1_STR}/availabilities", headers=speaker_token_headers, json=data)
         assert r.status_code == 200, f"{r.json()}"
         r_avail = r.json()

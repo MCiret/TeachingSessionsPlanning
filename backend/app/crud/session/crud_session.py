@@ -33,21 +33,28 @@ class CRUDSession(CRUDBase[Session, SessionCreate, SessionUpdate]):
                                  .join(Participant, self.model.participant_id == Participant.id)
                                  .where(Participant.speaker_id == speaker_id))).scalars().all()
 
+    async def get_by_date_speaker(self, db: AsyncSession, *, speaker_id: int, date: dt.date) -> list[Session]:
+        return (await db.execute(select(self.model)
+                                 .join(Participant, self.model.participant_id == Participant.id)
+                                 .where(Participant.speaker_id == speaker_id, self.model.date == date))).scalars()\
+                                                                                                        .all()
+
     async def get_by_date_and_time(self, db: AsyncSession, *, date: dt.date, time: dt.time) -> list[Session] | None:
         return (await db.execute(select(self.model)
                                  .where(self.model.date == date, self.model.time == time))).scalars().all()
 
     async def is_whole_slot_time_free(self,  db: AsyncSession, *, obj_in: SessionCreate | SessionUpdate) -> bool:
-        """Checks if speaker is really free for the session to be created..."""
+        """Checks if speaker is really free for the session to be create..."""
 
         obj_in_speaker = await crud.speaker.get_by_participant_id(db, participant_id=obj_in.participant_id)
 
         # If speaker has not a corresponding availability, no need to check more :
-        if not crud.availability.get_by_date_time_speaker(db, speaker_id=obj_in_speaker.id,
-                                                          date=obj_in.date, time=obj_in.time):
+        if not crud.availability.get_one_around_date_same_weekday_time_speaker(db, obj_in_speaker.id, obj_in.date,
+                                                                                  obj_in.time):
             return False
+
         # Else, speaker has a corresponding availability => check if it is free (i.e no other session) :
-        speaker_day_free_times = await crud.speaker.get_day_free_time(db, bd_obj=obj_in_speaker, data=obj_in.date)
+        speaker_day_free_times = await crud.speaker.get_day_free_times(db, bd_obj=obj_in_speaker, data=obj_in.date)
         if obj_in.time in speaker_day_free_times:
             obj_in_participant_nb_session_week = await crud.participant\
                                                            .get_nb_session_week(db, id=obj_in.participant_id)

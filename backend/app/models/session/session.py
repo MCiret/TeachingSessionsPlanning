@@ -25,3 +25,7 @@ class Session(Base):
 
     status_id = Column(Integer, ForeignKey('sessionstatus.id'), index=True, nullable=False)  # one to many
     status = relationship("SessionStatus", back_populates="sessions")
+
+    def __repr__(self):
+        return (f"Session(id={self.id!r}, date={self.date!s}, time={self.time!s}, comments={self.comments!r} "
+                f"participant_id={self.participant_id!r}, type_id={self.type_id!r}, status_id={self.status_id!r})")

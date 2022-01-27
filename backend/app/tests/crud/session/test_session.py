@@ -1,4 +1,4 @@
-from datetime import time, date, datetime
+import datetime as dt
 
 import pytest
 from fastapi.encoders import jsonable_encoder
@@ -18,14 +18,15 @@ pytestmark = pytest.mark.anyio
 
 
 async def test_create_session(db_tests: AsyncSession) -> None:
-    date_ = date.today()
-    time_ = datetime.now().time()
+    date_ = dt.date.today()
+    time_ = dt.datetime.now().time()
     participant = await ut.create_random_participant(db_tests)
     created_session = await ut.create_random_session(db_tests, date_=date_, time_=time_, participant_id=participant.id)
     db_created_session = await crud.session.get(db_tests, id=created_session.id)
     assert db_created_session.date == date_ and db_created_session.time == time_
     assert db_created_session.participant_id == participant.id
     assert hasattr(db_created_session, "comments")
+    await crud.session.remove(db_tests, id=created_session.id)
 
 
 async def test_get_session(db_tests: AsyncSession) -> None:
@@ -35,33 +36,41 @@ async def test_get_session(db_tests: AsyncSession) -> None:
     assert created_session.date == got_session.date\
         and created_session.time == got_session.time
     assert jsonable_encoder(got_session) == jsonable_encoder(created_session)
+    await crud.session.remove(db_tests, id=created_session.id)
 
 
 async def test_get_multi_session(db_tests: AsyncSession) -> None:
-    await ut.create_random_session(db_tests)
-    await ut.create_random_session(db_tests)
-    await ut.create_random_session(db_tests)
+    s1 = await ut.create_random_session(db_tests)
+    s2 = await ut.create_random_session(db_tests)
+    s3 = await ut.create_random_session(db_tests)
     got_multi_session = await crud.session.get_multi(db_tests)
     assert len(got_multi_session) >= 3
+    await crud.session.remove(db_tests, id=s1.id)
+    await crud.session.remove(db_tests, id=s2.id)
+    await crud.session.remove(db_tests, id=s3.id)
 
 
 async def test_get_by_date_and_time(db_tests: AsyncSession) -> None:
-    created_session_1_a_id = (await ut.create_random_session(db_tests, time_=time(10, 30), date_=date(2022, 1, 6))).id
-    created_session_1_b_id = (await ut.create_random_session(db_tests, time_=time(10, 30), date_=date(2022, 1, 7))).id
-    created_session_2_a_id = (await ut.create_random_session(db_tests, time_=time(10, 30), date_=date(2022, 1, 6))).id
-    created_session_2_b_id = (await ut.create_random_session(db_tests, time_=time(11, 30), date_=date(2022, 1, 6))).id
-    by_time_and_date_sessions_list = await crud.session.get_by_date_and_time(db_tests, time=time(10, 30),
-                                                                             date=date(2022, 1, 6))
+    created_session_1_a_id = (await ut.create_random_session(db_tests, time_=dt.time(10, 30),
+                                                             date_=dt.date(2022, 1, 6))).id
+    created_session_1_b_id = (await ut.create_random_session(db_tests, time_=dt.time(10, 30),
+                                                             date_=dt.date(2022, 1, 7))).id
+    created_session_2_a_id = (await ut.create_random_session(db_tests, time_=dt.time(10, 30),
+                                                             date_=dt.date(2022, 1, 6))).id
+    created_session_2_b_id = (await ut.create_random_session(db_tests, time_=dt.time(11, 30),
+                                                             date_=dt.date(2022, 1, 6))).id
+    by_time_and_date_sessions_list = await crud.session.get_by_date_and_time(db_tests, time=dt.time(10, 30),
+                                                                             date=dt.date(2022, 1, 6))
     sessions_id_list = [session.id for session in by_time_and_date_sessions_list]
     assert created_session_1_a_id in sessions_id_list
     assert created_session_2_a_id in sessions_id_list
     assert created_session_1_b_id not in sessions_id_list
     assert created_session_2_b_id not in sessions_id_list
-    by_time_and_date_sessions_list = await crud.session.get_by_date_and_time(db_tests, time=time(11, 30),
-                                                                             date=date(2022, 1, 7))
+    by_time_and_date_sessions_list = await crud.session.get_by_date_and_time(db_tests, time=dt.time(11, 30),
+                                                                             date=dt.date(2022, 1, 7))
     assert not by_time_and_date_sessions_list
-    by_time_and_date_sessions_list = await crud.session.get_by_date_and_time(db_tests, time=time(10, 30),
-                                                                             date=date(2022, 1, 7))
+    by_time_and_date_sessions_list = await crud.session.get_by_date_and_time(db_tests, time=dt.time(10, 30),
+                                                                             date=dt.date(2022, 1, 7))
     sessions_id_list = [session.id for session in by_time_and_date_sessions_list]
     assert created_session_1_a_id not in sessions_id_list
     assert created_session_2_a_id not in sessions_id_list
@@ -73,14 +82,33 @@ async def test_get_by_date_and_time(db_tests: AsyncSession) -> None:
     await crud.session.remove(db_tests, id=created_session_2_b_id)
 
 
+async def test_get_by_date_speaker(db_tests: AsyncSession) -> None:
+    speaker = await ut.create_random_speaker(db_tests)
+    p1 = await ut.create_random_participant(db_tests, speaker_id=speaker.id)
+    s_p1 = await ut.create_random_session(db_tests, date_=dt.date(2022, 1, 7), participant_id=p1.id)
+    p2 = await ut.create_random_participant(db_tests, speaker_id=speaker.id)
+    s1_p2 = await ut.create_random_session(db_tests, date_=dt.date(2022, 1, 7), participant_id=p2.id)
+    s2_p2 = await ut.create_random_session(db_tests, date_=dt.date(2022, 1, 9), participant_id=p2.id)
+    p3 = await ut.create_random_participant(db_tests)
+    s_p3 = await ut.create_random_session(db_tests, date_=dt.date(2022, 1, 7), participant_id=p3.id)
+    sessions = await crud.session.get_by_date_speaker(db_tests, speaker_id=speaker.id, date=dt.date(2022, 1, 7))
+    session_ids = [s.id for s in sessions]
+    assert (s_p1.id and s1_p2.id) in session_ids
+    assert (s2_p2.id and s_p3.id) not in session_ids
+    await crud.session.remove(db_tests, id=s_p1.id)
+    await crud.session.remove(db_tests, id=s1_p2.id)
+    await crud.session.remove(db_tests, id=s2_p2.id)
+    await crud.session.remove(db_tests, id=s_p3.id)
+
+
 async def test_get_identical_session_return_a_session(db_tests: AsyncSession) -> None:
     speaker = await ut.create_random_speaker(db_tests)
     p1 = await ut.create_random_participant(db_tests, speaker_id=speaker.id)
-    session_p1 = await ut.create_random_session(db_tests, time_=time(10, 30), date_=date(2022, 1, 6),
+    session_p1 = await ut.create_random_session(db_tests, time_=dt.time(10, 30), date_=dt.date(2022, 1, 6),
                                                 participant_id=p1.id)
 
     p2 = await ut.create_random_participant(db_tests, speaker_id=speaker.id)
-    session_in_p2 = SessionCreate(date=date(2022, 1, 6), time=time(10, 30),
+    session_in_p2 = SessionCreate(date=dt.date(2022, 1, 6), time=dt.time(10, 30),
                                   participant_id=p2.id, type_name="type name", status_name="status name")
 
     assert await crud.session.get_identical_session(db_tests, date=session_in_p2.date, time=session_in_p2.time,
@@ -91,7 +119,7 @@ async def test_get_identical_session_return_a_session(db_tests: AsyncSession) ->
 async def test_get_identical_session_return_none(db_tests: AsyncSession) -> None:
     speaker = await ut.create_random_speaker(db_tests)
     participant = await ut.create_random_participant(db_tests, speaker_id=speaker.id)
-    session_in = SessionCreate(date=date(2022, 1, 6), time=time(10, 30),
+    session_in = SessionCreate(date=dt.date(2022, 1, 6), time=dt.time(10, 30),
                                participant_id=participant.id,
                                type_name="type name", status_name="status name")
 
@@ -102,13 +130,14 @@ async def test_get_identical_session_return_none(db_tests: AsyncSession) -> None
 async def test_update_session(db_tests: AsyncSession) -> None:
     created_session = await ut.create_random_session(db_tests)
     db_created_session = await crud.session.get(db_tests, id=created_session.id)
-    new_time = datetime.now().time()
+    new_time = dt.datetime.now().time()
     session_in_update = SessionUpdate(time=new_time)
     await crud.session.update(db_tests, db_obj=db_created_session, obj_in=session_in_update)
     updated_session = await crud.session.get(db_tests, id=db_created_session.id)
     assert updated_session
     assert created_session.date == updated_session.date
     assert created_session.id == updated_session.id
+    await crud.session.remove(db_tests, id=created_session.id)
 
 
 async def test_remove_session(db_tests: AsyncSession) -> None:
@@ -139,6 +168,7 @@ async def test_from_db_model_to_schema_mocked_crud(db_tests: AsyncSession, mocke
     assert schema_dict["id"] == session.id
     assert schema_dict["type_name"] == "mock type name"
     assert schema_dict["status_name"] == "mock status name"
+    await crud.session.remove(db_tests, id=session.id)
 
 
 async def test_from_db_model_to_schema(db_tests: AsyncSession) -> None:
@@ -149,8 +179,9 @@ async def test_from_db_model_to_schema(db_tests: AsyncSession) -> None:
     assert schema.type_name == s_type_name
     assert schema.status_name == s_status_name
     assert isinstance(schema, SessionSchema)
-    assert type(schema.date) == date
-    assert type(schema.time) == time
+    assert type(schema.date) == dt.date
+    assert type(schema.time) == dt.time
+    await crud.session.remove(db_tests, id=session.id)
 
 
 async def test_from_schema_to_model_db_with_create_schema(db_tests: AsyncSession) -> None:
@@ -159,7 +190,7 @@ async def test_from_schema_to_model_db_with_create_schema(db_tests: AsyncSession
     s_status_name = ut.random_list_elem(settings.SESSION_STATUS)
     db_s_type = await crud.session_type.get_by_name(db_tests, name=s_type_name)
     db_s_status = await crud.session_status.get_by_name(db_tests, name=s_status_name)
-    s_in = SessionCreate(date=date.today(), time=datetime.now().time(),
+    s_in = SessionCreate(date=dt.date.today(), time=dt.datetime.now().time(),
                          participant_id=participant.id, type_name=s_type_name, status_name=s_status_name)
     s_dict = await crud.session.from_schema_to_db_model(db_tests, obj_in=s_in)
     assert ("type_name" and "status_name") not in s_dict
@@ -167,8 +198,8 @@ async def test_from_schema_to_model_db_with_create_schema(db_tests: AsyncSession
     assert s_dict["type_id"] == db_s_type.id
     assert s_dict["status_id"] == db_s_status.id
     assert s_dict["participant_id"] == participant.id
-    assert type(s_dict["date"]) == date
-    assert type(s_dict["time"]) == time
+    assert type(s_dict["date"]) == dt.date
+    assert type(s_dict["time"]) == dt.time
 
 
 async def test_from_schema_to_model_db_with_update_schema_type_name(db_tests: AsyncSession) -> None:
@@ -182,20 +213,20 @@ async def test_from_schema_to_model_db_with_update_schema_type_name(db_tests: As
 
 
 async def test_from_schema_to_model_db_with_update_schema_date(db_tests: AsyncSession) -> None:
-    date_ = date.today()
+    date_ = dt.date.today()
     s_in = SessionUpdate(date=date_)
     s_dict = await crud.session.from_schema_to_db_model(db_tests, obj_in=s_in)
     assert ("type_name" and "status_name" and "type_id" and "time") not in s_dict
     assert "date" in s_dict
     assert s_dict["date"] == date_
-    assert type(s_dict["date"]) == date
+    assert type(s_dict["date"]) == dt.date
 
 
 async def test_from_schema_to_model_db_with_update_schema(db_tests: AsyncSession) -> None:
     s_type_name = ut.random_list_elem(settings.SESSION_TYPES)
     s_status_name = ut.random_list_elem(settings.SESSION_STATUS)
-    date_ = date.today()
-    time_ = datetime.now().time()
+    date_ = dt.date.today()
+    time_ = dt.datetime.now().time()
     db_s_type = await crud.session_type.get_by_name(db_tests, name=s_type_name)
     db_s_status = await crud.session_status.get_by_name(db_tests, name=s_status_name)
     s_in = SessionUpdate(type_name=s_type_name, status_name=s_status_name, date=date_, time=time_)
@@ -205,9 +236,9 @@ async def test_from_schema_to_model_db_with_update_schema(db_tests: AsyncSession
     assert s_dict["type_id"] == db_s_type.id
     assert s_dict["status_id"] == db_s_status.id
     assert s_dict["date"] == date_
-    assert type(s_dict["date"]) == date
+    assert type(s_dict["date"]) == dt.date
     assert s_dict["time"] == time_
-    assert type(s_dict["time"]) == time
+    assert type(s_dict["time"]) == dt.time
 
 
 async def test_get_by_participant_email(db_tests: AsyncSession) -> None:
@@ -221,6 +252,9 @@ async def test_get_by_participant_email(db_tests: AsyncSession) -> None:
     p1_sessions_id = [session.id for session in p1_sessions]
     assert (s1_p1.id and s2_p1.id) in p1_sessions_id
     assert s_p2.id not in p1_sessions_id
+    await crud.session.remove(db_tests, id=s1_p1.id)
+    await crud.session.remove(db_tests, id=s2_p1.id)
+    await crud.session.remove(db_tests, id=s_p2.id)
 
 
 async def test_get_by_speaker_email(db_tests: AsyncSession) -> None:
@@ -241,11 +275,15 @@ async def test_get_by_speaker_email(db_tests: AsyncSession) -> None:
     assert (s_p1.id and s_p2.id and s_p3.id) in sessions_id
     # assert speaker2 session was not selected
     assert s_p4 not in sessions_id
+    await crud.session.remove(db_tests, id=s_p1.id)
+    await crud.session.remove(db_tests, id=s_p2.id)
+    await crud.session.remove(db_tests, id=s_p3.id)
+    await crud.session.remove(db_tests, id=s_p4.id)
 
 
 async def test_before_create_update_participant_checks_and_get_id_curr_user_participant(db_tests: AsyncSession
                                                                                         ) -> None:
-    session_in = SessionCreate(date=date.today(), time=datetime.now().time(),
+    session_in = SessionCreate(date=dt.date.today(), time=dt.datetime.now().time(),
                                participant_id=None, type_name="type name", status_name="status name")
     participant = await ut.create_random_participant(db_tests)
     assert await crud.session\
@@ -257,7 +295,7 @@ async def test_before_create_update_participant_checks_and_get_id_curr_user_part
 async def test_before_create_update_participant_checks_and_get_id_curr_user_speaker(db_tests: AsyncSession) -> None:
     speaker = await ut.create_random_speaker(db_tests)
     participant = await ut.create_random_participant(db_tests)
-    session_in = SessionCreate(date=date.today(), time=datetime.now().time(),
+    session_in = SessionCreate(date=dt.date.today(), time=dt.datetime.now().time(),
                                participant_id=participant.id, type_name="type name", status_name="status name")
     assert await crud.session\
                      .before_create_or_update_participant_checks_and_get_id(db_tests,
@@ -266,7 +304,7 @@ async def test_before_create_update_participant_checks_and_get_id_curr_user_spea
 
 
 async def test_before_create_update_participant_checks_and_get_id_curr_user_speaker_participant_id_none(db_tests: AsyncSession) -> None:  # noqa
-    session_in = SessionCreate(date=date.today(), time=datetime.now().time(),
+    session_in = SessionCreate(date=dt.date.today(), time=dt.datetime.now().time(),
                                participant_id=None, type_name="type name", status_name="status name")
     speaker = await ut.create_random_speaker(db_tests)
     with pytest.raises(HTTPException) as he:
@@ -276,7 +314,7 @@ async def test_before_create_update_participant_checks_and_get_id_curr_user_spea
 
 
 async def test_before_create_update_participant_checks_and_get_id_curr_user_speaker_participant_id_not_exist(db_tests: AsyncSession, mocker) -> None:  # noqa
-    session_in = SessionCreate(date=date.today(), time=datetime.now().time(),
+    session_in = SessionCreate(date=dt.date.today(), time=dt.datetime.now().time(),
                                participant_id=1, type_name="type name", status_name="status name")
     mock_get_participant = mocker.patch('app.crud.participant.get')
     mock_get_participant.return_value = False
@@ -333,17 +371,18 @@ async def test_type_and_status_names_checks_status_not_existing(db_tests: AsyncS
 #     session = await ut.create_random_session(db_tests, participant_id=participant.id)
 #     speaker = await crud.session.get_speaker(db_tests, db_obj=session)
 #     assert speaker.id == participant.speaker_id
+#     await crud.session.remove(db_tests, id=session.id)
 
 
 async def test_is_start_time_free_true_not_existing_session(db_tests: AsyncSession) -> None:
     speaker = await ut.create_random_speaker(db_tests)
     participant = await ut.create_random_participant(db_tests, speaker_id=speaker.id)
     # another session with same time + date but random participant and so random speaker :
-    s1 = await ut.create_random_session(db_tests, time_=time(10, 30), date_=date(2022, 1, 20))
+    s1 = await ut.create_random_session(db_tests, time_=dt.time(10, 30), date_=dt.date(2022, 1, 20))
     # create a same time but different date session :
-    s2 = await ut.create_random_session(db_tests, time_=time(10, 30), date_=date(2022, 1, 19),
+    s2 = await ut.create_random_session(db_tests, time_=dt.time(10, 30), date_=dt.date(2022, 1, 19),
                                         participant_id=participant.id)
-    session_in = SessionCreate(date=date(2022, 1, 20), time=time(10, 30),
+    session_in = SessionCreate(date=dt.date(2022, 1, 20), time=dt.time(10, 30),
                                participant_id=participant.id,
                                type_name="type name", status_name="status name")
     assert await crud.session.is_start_time_free(db_tests, obj_in=session_in)
@@ -355,12 +394,13 @@ async def test_is_start_time_free_false_existing_identical_session(db_tests: Asy
     """NB: identical session means same time + date + speaker."""
     speaker = await ut.create_random_speaker(db_tests)
     p1 = await ut.create_random_participant(db_tests, speaker_id=speaker.id)
-    s1 = await ut.create_random_session(db_tests, time_=time(10, 30), date_=date(2022, 1, 20), participant_id=p1.id)
+    s1 = await ut.create_random_session(db_tests, time_=dt.time(10, 30), date_=dt.date(2022, 1, 20),
+                                        participant_id=p1.id)
     # another session with same time + date but random participant and so random speaker :
-    s2 = await ut.create_random_session(db_tests, time_=time(10, 30), date_=date(2022, 1, 20))
+    s2 = await ut.create_random_session(db_tests, time_=dt.time(10, 30), date_=dt.date(2022, 1, 20))
 
     p2 = await ut.create_random_participant(db_tests, speaker_id=speaker.id)
-    session_in_p2 = SessionCreate(date=date(2022, 1, 20), time=time(10, 30),
+    session_in_p2 = SessionCreate(date=dt.date(2022, 1, 20), time=dt.time(10, 30),
                                   participant_id=p2.id, type_name="type name", status_name="status name")
     assert not await crud.session.is_start_time_free(db_tests, obj_in=session_in_p2)
     await crud.session.remove(db_tests, id=s1.id)
@@ -373,12 +413,13 @@ async def test_is_start_time_free_false_existing_two_slots_time_session_one_slot
     p_type_two_sessions_week = await crud.participant_type\
                                          .create(db_tests, obj_in={"name": "p type name", "nb_session_week": 2})
     p1 = await ut.create_random_participant(db_tests, speaker_id=speaker.id, p_type_name=p_type_two_sessions_week.name)
-    s1_p1 = await ut.create_random_session(db_tests, time_=time(10, 00), date_=date(2022, 1, 20), participant_id=p1.id)
+    s1_p1 = await ut.create_random_session(db_tests, time_=dt.time(10, 00), date_=dt.date(2022, 1, 20),
+                                           participant_id=p1.id)
     # another session with same time + date but random participant and so random speaker :
-    s2 = await ut.create_random_session(db_tests, time_=time(10, 30), date_=date(2022, 1, 20))
+    s2 = await ut.create_random_session(db_tests, time_=dt.time(10, 30), date_=dt.date(2022, 1, 20))
 
     p2 = await ut.create_random_participant(db_tests, speaker_id=speaker.id)
-    session_in_p2 = SessionCreate(date=date(2022, 1, 20), time=time(10, 30),
+    session_in_p2 = SessionCreate(date=dt.date(2022, 1, 20), time=dt.time(10, 30),
                                   participant_id=p2.id, type_name="type name", status_name="status name")
     assert not await crud.session.is_start_time_free(db_tests, obj_in=session_in_p2)
 
@@ -394,12 +435,13 @@ async def test_is_start_time_free_true_existing_two_slots_time_session_two_slots
     p_type_two_sessions_week = await crud.participant_type\
                                          .create(db_tests, obj_in={"name": "p type name", "nb_session_week": 2})
     p1 = await ut.create_random_participant(db_tests, speaker_id=speaker.id, p_type_name=p_type_two_sessions_week.name)
-    s1_p1 = await ut.create_random_session(db_tests, time_=time(9, 30), date_=date(2022, 1, 20), participant_id=p1.id)
+    s1_p1 = await ut.create_random_session(db_tests, time_=dt.time(9, 30), date_=dt.date(2022, 1, 20),
+                                           participant_id=p1.id)
     # another session with same time + date but random participant and so random speaker :
-    s2 = await ut.create_random_session(db_tests, time_=time(10, 30), date_=date(2022, 1, 20))
+    s2 = await ut.create_random_session(db_tests, time_=dt.time(10, 30), date_=dt.date(2022, 1, 20))
 
     p2 = await ut.create_random_participant(db_tests, speaker_id=speaker.id)
-    session_in_p2 = SessionCreate(date=date(2022, 1, 20), time=time(10, 30),
+    session_in_p2 = SessionCreate(date=dt.date(2022, 1, 20), time=dt.time(10, 30),
                                   participant_id=p2.id, type_name="type name", status_name="status name")
     assert await crud.session.is_start_time_free(db_tests, obj_in=session_in_p2)
 
@@ -416,12 +458,13 @@ async def test_is_start_time_free_false_existing_3_slots_time_session_two_slots_
                                        .create(db_tests, obj_in={"name": "p type name", "nb_session_week": 3})
     p1 = await ut.create_random_participant(db_tests, speaker_id=speaker.id,
                                             p_type_name=p_type_3_sessions_week.name)
-    s1_p1 = await ut.create_random_session(db_tests, time_=time(9, 30), date_=date(2022, 1, 20), participant_id=p1.id)
+    s1_p1 = await ut.create_random_session(db_tests, time_=dt.time(9, 30), date_=dt.date(2022, 1, 20),
+                                           participant_id=p1.id)
     # another session with same time + date but random participant and so random speaker :
-    s2 = await ut.create_random_session(db_tests, time_=time(10, 30), date_=date(2022, 1, 20))
+    s2 = await ut.create_random_session(db_tests, time_=dt.time(10, 30), date_=dt.date(2022, 1, 20))
 
     p2 = await ut.create_random_participant(db_tests, speaker_id=speaker.id)
-    session_in_p2 = SessionCreate(date=date(2022, 1, 20), time=time(10, 30),
+    session_in_p2 = SessionCreate(date=dt.date(2022, 1, 20), time=dt.time(10, 30),
                                   participant_id=p2.id, type_name="type name", status_name="status name")
     assert not await crud.session.is_start_time_free(db_tests, obj_in=session_in_p2)
 
@@ -437,12 +480,13 @@ async def test_is_start_time_free_true_existing_3_slots_time_session_3_slots_tim
     p_type_3_sessions_week = await crud.participant_type\
                                        .create(db_tests, obj_in={"name": "p type name", "nb_session_week": 3})
     p1 = await ut.create_random_participant(db_tests, speaker_id=speaker.id, p_type_name=p_type_3_sessions_week.name)
-    s1_p1 = await ut.create_random_session(db_tests, time_=time(9, 00), date_=date(2022, 1, 20), participant_id=p1.id)
+    s1_p1 = await ut.create_random_session(db_tests, time_=dt.time(9, 00), date_=dt.date(2022, 1, 20),
+                                           participant_id=p1.id)
     # another session with same time + date but random participant and so random speaker :
-    s2 = await ut.create_random_session(db_tests, time_=time(10, 30), date_=date(2022, 1, 20))
+    s2 = await ut.create_random_session(db_tests, time_=dt.time(10, 30), date_=dt.date(2022, 1, 20))
 
     p2 = await ut.create_random_participant(db_tests, speaker_id=speaker.id)
-    session_in_p2 = SessionCreate(date=date(2022, 1, 20), time=time(10, 30),
+    session_in_p2 = SessionCreate(date=dt.date(2022, 1, 20), time=dt.time(10, 30),
                                   participant_id=p2.id, type_name="type name", status_name="status name")
     assert await crud.session.is_start_time_free(db_tests, obj_in=session_in_p2)
 
@@ -456,12 +500,12 @@ async def test_is_slot_time_free_until_end_true_not_existing_session(db_tests: A
     speaker = await ut.create_random_speaker(db_tests)
     participant = await ut.create_random_participant(db_tests, speaker_id=speaker.id)
     # create a same time but different date session :
-    s1 = await ut.create_random_session(db_tests, time_=time(10, 30), date_=date(2022, 1, 19),
+    s1 = await ut.create_random_session(db_tests, time_=dt.time(10, 30), date_=dt.date(2022, 1, 19),
                                         participant_id=participant.id)
     # another session with same time + date but random participant and so random speaker :
-    s2 = await ut.create_random_session(db_tests, time_=time(10, 30), date_=date(2022, 1, 20))
+    s2 = await ut.create_random_session(db_tests, time_=dt.time(10, 30), date_=dt.date(2022, 1, 20))
 
-    session_in = SessionCreate(date=date(2022, 1, 20), time=time(10, 30),
+    session_in = SessionCreate(date=dt.date(2022, 1, 20), time=dt.time(10, 30),
                                participant_id=participant.id,
                                type_name="type name", status_name="status name")
     assert await crud.session.is_slot_time_free_until_end(db_tests, obj_in=session_in)
@@ -473,12 +517,13 @@ async def test_is_slot_time_free_until_end_false_existing_identical_session(db_t
     """NB: identical session means same time + date + speaker."""
     speaker = await ut.create_random_speaker(db_tests)
     p1 = await ut.create_random_participant(db_tests, speaker_id=speaker.id)
-    s1 = await ut.create_random_session(db_tests, time_=time(10, 30), date_=date(2022, 1, 20), participant_id=p1.id)
+    s1 = await ut.create_random_session(db_tests, time_=dt.time(10, 30), date_=dt.date(2022, 1, 20),
+                                        participant_id=p1.id)
     # another session with same time + date but random participant and so random speaker :
-    s2 = await ut.create_random_session(db_tests, time_=time(10, 30), date_=date(2022, 1, 20))
+    s2 = await ut.create_random_session(db_tests, time_=dt.time(10, 30), date_=dt.date(2022, 1, 20))
 
     p2 = await ut.create_random_participant(db_tests, speaker_id=speaker.id)
-    session_in_p2 = SessionCreate(date=date(2022, 1, 20), time=time(10, 30),
+    session_in_p2 = SessionCreate(date=dt.date(2022, 1, 20), time=dt.time(10, 30),
                                   participant_id=p2.id, type_name="type name", status_name="status name")
     assert not await crud.session.is_slot_time_free_until_end(db_tests, obj_in=session_in_p2)
     await crud.session.remove(db_tests, id=s1.id)
@@ -488,14 +533,15 @@ async def test_is_slot_time_free_until_end_false_existing_identical_session(db_t
 async def test_is_slot_time_free_until_end_false_2_slots_existing_session_1_slot_after(db_tests: AsyncSession) -> None:
     speaker = await ut.create_random_speaker(db_tests, slot_time=45)
     p1 = await ut.create_random_participant(db_tests, speaker_id=speaker.id)
-    s1 = await ut.create_random_session(db_tests, time_=time(11, 00), date_=date(2022, 1, 20), participant_id=p1.id)
+    s1 = await ut.create_random_session(db_tests, time_=dt.time(11, 00), date_=dt.date(2022, 1, 20),
+                                        participant_id=p1.id)
     # another session with same time + date but random participant and so random speaker :
-    s2 = await ut.create_random_session(db_tests, time_=time(10, 30), date_=date(2022, 1, 20))
+    s2 = await ut.create_random_session(db_tests, time_=dt.time(10, 30), date_=dt.date(2022, 1, 20))
 
     p_type_two_sessions_week = await crud.participant_type\
                                          .create(db_tests, obj_in={"name": "type_name", "nb_session_week": 2})
     p2 = await ut.create_random_participant(db_tests, speaker_id=speaker.id, p_type_name=p_type_two_sessions_week.name)
-    session_in_p2 = SessionCreate(date=date(2022, 1, 20), time=time(10, 15),
+    session_in_p2 = SessionCreate(date=dt.date(2022, 1, 20), time=dt.time(10, 15),
                                   participant_id=p2.id, type_name="type name", status_name="status name")
     assert not await crud.session.is_slot_time_free_until_end(db_tests, obj_in=session_in_p2)
 
@@ -508,14 +554,15 @@ async def test_is_slot_time_free_until_end_false_2_slots_existing_session_1_slot
 async def test_is_slot_time_free_until_end_true_2_slots_existing_session_2_slots_after(db_tests: AsyncSession) -> None:
     speaker = await ut.create_random_speaker(db_tests, slot_time=30)
     p1 = await ut.create_random_participant(db_tests, speaker_id=speaker.id)
-    s1 = await ut.create_random_session(db_tests, time_=time(11, 30), date_=date(2022, 1, 20), participant_id=p1.id)
+    s1 = await ut.create_random_session(db_tests, time_=dt.time(11, 30), date_=dt.date(2022, 1, 20),
+                                        participant_id=p1.id)
     # another session with same time + date but random participant and so random speaker :
-    s2 = await ut.create_random_session(db_tests, time_=time(10, 30), date_=date(2022, 1, 20))
+    s2 = await ut.create_random_session(db_tests, time_=dt.time(10, 30), date_=dt.date(2022, 1, 20))
 
     p_type_two_sessions_week = await crud.participant_type\
                                          .create(db_tests, obj_in={"name": "type_name", "nb_session_week": 2})
     p2 = await ut.create_random_participant(db_tests, speaker_id=speaker.id, p_type_name=p_type_two_sessions_week.name)
-    session_in_p2 = SessionCreate(date=date(2022, 1, 20), time=time(10, 30),
+    session_in_p2 = SessionCreate(date=dt.date(2022, 1, 20), time=dt.time(10, 30),
                                   participant_id=p2.id, type_name="type name", status_name="status name")
     assert await crud.session.is_slot_time_free_until_end(db_tests, obj_in=session_in_p2)
     await crud.session.remove(db_tests, id=s1.id)
@@ -535,7 +582,7 @@ class TestIsWholeSlotTimeFree:
         return {"mock_is_start_time": mock_is_start_time,
                 "mock_is_free_until_end": mock_is_free_until_end}
 
-    session_in = SessionCreate(date=date(2022, 1, 20), time=time(10, 30),
+    session_in = SessionCreate(date=dt.date(2022, 1, 20), time=dt.time(10, 30),
                                participant_id=1, type_name="type name", status_name="status name")
 
     @pytest.mark.until_end(True)

@@ -13,3 +13,6 @@ class SessionType(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True, nullable=False, unique=True)
     sessions = relationship("Session", back_populates="type")  # many to one
+
+    def __repr__(self):
+        return (f"SessionType(id={self.id!r}, name={self.name!r})")
