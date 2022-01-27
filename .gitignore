@@ -1,0 +1,3 @@
+backend/.coveragerc
+backend/.coverage
+backend/htmlcov

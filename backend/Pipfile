@@ -1,0 +1,30 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pytest = "*"
+requests = "*"
+uvicorn = "*"
+fastapi = "*"
+asyncpg = "*"
+databases = {extras = ["postgresql"], version = "*"}
+sqlalchemy = "*"
+alembic = "*"
+python-multipart = "*"
+passlib = {extras = ["bcrypt"], version = "*"}
+python-jose = {extras = ["cryptography"], version = "*"}
+pydantic = {extras = ["email"], version = "*"}
+emails = "*"
+httpx = "*"
+pytest-randomly = "*"
+pytest-cov = "*"
+pytest-mock = "*"
+
+[dev-packages]
+flake8 = "*"
+autopep8 = "*"
+
+[requires]
+python_version = "3.10"
