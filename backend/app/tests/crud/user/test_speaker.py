@@ -59,9 +59,9 @@ async def test_get_by_participant_id(db_tests: AsyncSession) -> None:
 
 @pytest.fixture
 async def db_data(db_tests: AsyncSession) -> ParticipantType:
-    p_type_1sw = await crud.participant_type.create(db_tests, obj_in=ParticipantTypeCreate(name = "one_sw",
+    p_type_1sw = await crud.participant_type.create(db_tests, obj_in=ParticipantTypeCreate(name="one_sw",
                                                                                            nb_session_week=1))
-    p_type_2sw = await crud.participant_type.create(db_tests, obj_in=ParticipantTypeCreate(name = "two_sw",
+    p_type_2sw = await crud.participant_type.create(db_tests, obj_in=ParticipantTypeCreate(name="two_sw",
                                                                                            nb_session_week=2))
     speaker = await ut.create_random_speaker(db_tests, slot_time=30)
     p_1sw = await ut.create_random_participant(db_tests, speaker_id=speaker.id, p_type_name="one_sw")
@@ -89,7 +89,7 @@ async def test_get_sessions_times_by_date(db_tests: AsyncSession, db_data) -> No
     assert not await crud.speaker.get_sessions_times_by_date(db_tests, db_obj=db_data["speaker"],
                                                              date=dt.date(2022, 2, 12))
     spk_sessions_times_list = await crud.speaker.get_sessions_times_by_date(db_tests, db_obj=db_data["speaker"],
-                                                                        date=dt.date(2022, 2, 15))
+                                                                            date=dt.date(2022, 2, 15))
     assert len(spk_sessions_times_list) == 5
     assert (dt.time(10) and dt.time(10, 30) and dt.time(11)
             and dt.time(14, 30) and dt.time(15)) in spk_sessions_times_list

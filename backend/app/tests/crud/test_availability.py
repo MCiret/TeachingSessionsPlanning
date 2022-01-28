@@ -193,8 +193,8 @@ class TestCrudAvailabilityOne:
         spk1_id = db_avails["speaker1"].id
         # thursday
         avails_times_thur_8_march = await crud.availability\
-                                        .get_times_list_by_date_speaker(db_tests, spk1_id,
-                                                                        dt.date(2022, 3, 8))
+                                              .get_times_list_by_date_speaker(db_tests, spk1_id,
+                                                                              dt.date(2022, 3, 8))
         assert len(avails_times_thur_8_march) == 2
         assert (dt.time(9) and dt.time(9, 30)) in avails_times_thur_8_march
 
@@ -429,34 +429,34 @@ class TestCrudAvailabilityTwo:
         spk2_id = db_avails["speaker2"].id
 
         assert not await crud.availability.is_same_weekday_period_speaker(db_tests, speaker_id=spk1_id,
-                                                                         obj_in=avail_in_1)
+                                                                          obj_in=avail_in_1)
         assert await crud.availability.is_same_weekday_period_speaker(db_tests, speaker_id=spk1_id,
-                                                                     obj_in=avail_in_2)
+                                                                      obj_in=avail_in_2)
         assert await crud.availability.is_same_weekday_period_speaker(db_tests, speaker_id=spk1_id,
-                                                                     obj_in=avail_in_3)
+                                                                      obj_in=avail_in_3)
         assert await crud.availability.is_same_weekday_period_speaker(db_tests, speaker_id=spk1_id,
-                                                                     obj_in=avail_in_4)
+                                                                      obj_in=avail_in_4)
         assert not await crud.availability.is_same_weekday_period_speaker(db_tests, speaker_id=spk1_id,
-                                                                         obj_in=avail_in_5)
+                                                                          obj_in=avail_in_5)
         assert await crud.availability.is_same_weekday_period_speaker(db_tests, speaker_id=spk1_id,
-                                                                     obj_in=avail_in_7)
+                                                                      obj_in=avail_in_7)
         assert not await crud.availability.is_same_weekday_period_speaker(db_tests, speaker_id=spk1_id,
-                                                                         obj_in=avail_in_8)
+                                                                          obj_in=avail_in_8)
 
         spk2_id = db_avails["speaker2"].id
         assert not await crud.availability.is_same_weekday_period_speaker(db_tests, speaker_id=spk2_id,
-                                                                         obj_in=avail_in_1)
+                                                                          obj_in=avail_in_1)
         assert await crud.availability.is_same_weekday_period_speaker(db_tests, speaker_id=spk2_id,
-                                                                     obj_in=avail_in_2)
+                                                                      obj_in=avail_in_2)
         assert await crud.availability.is_same_weekday_period_speaker(db_tests, speaker_id=spk2_id,
-                                                                     obj_in=avail_in_3)
+                                                                      obj_in=avail_in_3)
         assert await crud.availability.is_same_weekday_period_speaker(db_tests, speaker_id=spk2_id,
-                                                                     obj_in=avail_in_4)
+                                                                      obj_in=avail_in_4)
         assert not await crud.availability.is_same_weekday_period_speaker(db_tests, speaker_id=spk2_id,
-                                                                         obj_in=avail_in_5)
+                                                                          obj_in=avail_in_5)
 
         assert not await crud.availability.is_same_weekday_period_speaker(db_tests, speaker_id=spk2_id,
-                                                                         obj_in=avail_in_6)
+                                                                          obj_in=avail_in_6)
 
     async def test_is_same_weekday_time_period_speaker(self, db_avails, db_tests: AsyncSession) -> None:
         spk1_id = db_avails["speaker1"].id
@@ -475,27 +475,27 @@ class TestCrudAvailabilityTwo:
         avail_in_7 = AvailabilityCreate(start_date=dt.date(2021, 12, 1), end_date=dt.date(2022, 8, 31),
                                         week_day=4, time=dt.time(14))
         assert not await crud.availability.is_same_weekday_time_period_speaker(db_tests, speaker_id=spk1_id,
-                                                                              obj_in=avail_in_1)
+                                                                               obj_in=avail_in_1)
         assert await crud.availability.is_same_weekday_time_period_speaker(db_tests, speaker_id=spk1_id,
-                                                                          obj_in=avail_in_2)
+                                                                           obj_in=avail_in_2)
         assert await crud.availability.is_same_weekday_time_period_speaker(db_tests, speaker_id=spk1_id,
-                                                                          obj_in=avail_in_3)
+                                                                           obj_in=avail_in_3)
         assert await crud.availability.is_same_weekday_time_period_speaker(db_tests, speaker_id=spk1_id,
-                                                                          obj_in=avail_in_4)
+                                                                           obj_in=avail_in_4)
         assert not await crud.availability.is_same_weekday_time_period_speaker(db_tests, speaker_id=spk1_id,
-                                                                              obj_in=avail_in_5)
+                                                                               obj_in=avail_in_5)
         assert await crud.availability.is_same_weekday_time_period_speaker(db_tests, speaker_id=spk1_id,
-                                                                          obj_in=avail_in_7)
+                                                                           obj_in=avail_in_7)
         spk2_id = db_avails["speaker2"].id
         assert not await crud.availability.is_same_weekday_time_period_speaker(db_tests, speaker_id=spk2_id,
-                                                                              obj_in=avail_in_1)
+                                                                               obj_in=avail_in_1)
         assert await crud.availability.is_same_weekday_time_period_speaker(db_tests, speaker_id=spk2_id,
-                                                                          obj_in=avail_in_2)
+                                                                           obj_in=avail_in_2)
         assert await crud.availability.is_same_weekday_time_period_speaker(db_tests, speaker_id=spk2_id,
-                                                                          obj_in=avail_in_3)
+                                                                           obj_in=avail_in_3)
         assert await crud.availability.is_same_weekday_time_period_speaker(db_tests, speaker_id=spk2_id,
-                                                                          obj_in=avail_in_4)
+                                                                           obj_in=avail_in_4)
         assert not await crud.availability.is_same_weekday_time_period_speaker(db_tests, speaker_id=spk2_id,
-                                                                              obj_in=avail_in_5)
+                                                                               obj_in=avail_in_5)
         assert not await crud.availability.is_same_weekday_time_period_speaker(db_tests, speaker_id=spk2_id,
-                                                                              obj_in=avail_in_6)
+                                                                               obj_in=avail_in_6)

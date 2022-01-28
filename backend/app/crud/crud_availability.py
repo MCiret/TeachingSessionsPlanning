@@ -68,7 +68,7 @@ class CRUDAvailability(CRUDBase[Availability, AvailabilityCreate, AvailabilityUp
                                  .where(self.model.speaker_id == speaker_id))).scalars().all()
 
     async def get_all_around_date_same_weekday_speaker(self, db: AsyncSession,
-                                             speaker_id: int, date: dt.date) -> list[Availability]:
+                                                       speaker_id: int, date: dt.date) -> list[Availability]:
         """
         Return all speaker's availabilities with same weekday and with start_date before & end_date after the date.
         Useful to then find all availabilities for a precised date (see get_all_by_date_speaker() below).
@@ -81,7 +81,7 @@ class CRUDAvailability(CRUDBase[Availability, AvailabilityCreate, AvailabilityUp
                                         self.model.end_date >= date))).scalars().all()
 
     async def get_one_around_date_same_weekday_time_speaker(self, db: AsyncSession, speaker_id: int, date: dt.date,
-                                                               time: dt.time) -> Availability | None:
+                                                            time: dt.time) -> Availability | None:
         """
         Return a speaker's availability with same time+weekday and with start_date before & end_date after the date.
         Useful to know if a session can be created at this date on this time.
@@ -100,7 +100,6 @@ class CRUDAvailability(CRUDBase[Availability, AvailabilityCreate, AvailabilityUp
         Return all speaker's availabilities times that corresponds to the date.
         """
         return [av.time for av in await self.get_all_around_date_same_weekday_speaker(db, speaker_id, date=date)]
-
 
     async def get_by_weekday_time_speaker(self, db: AsyncSession, *, speaker_id: int, week_day: int,
                                           time: dt.time) -> list[Availability]:
