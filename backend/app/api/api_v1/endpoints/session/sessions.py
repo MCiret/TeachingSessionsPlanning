@@ -70,7 +70,7 @@ async def create_session(
                     detail="A session with same date, time and speaker already exists in the system...",
                 )
     session_in.participant_id = await crud.session.participant_checks_and_get_id(db, session_in, current_user)
-    await crud.session.before_create_or_update_type_and_status_names_checks(db, session_in)
+    await crud.session.type_and_status_names_checks(db, session_in)
 
     session = await crud.session.create(db, obj_in=session_in)
     # if settings.EMAILS_ENABLED and user_in.email:

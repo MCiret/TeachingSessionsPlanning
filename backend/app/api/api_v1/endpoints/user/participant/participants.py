@@ -42,11 +42,8 @@ async def create_participant(
     if db_participant:
         raise HTTPException(status_code=400, detail="A user with this email already exists in the system...")
 
-    participant_in.speaker_id = await crud.participant\
-                                          .before_create_or_update_speaker_checks_and_get_id(db,
-                                                                                             participant_in,
-                                                                                             current_user)
-    await crud.participant.before_create_or_update_type_and_status_names_checks(db, participant_in)
+    participant_in.speaker_id = await crud.participant.speaker_checks_and_get_id(db, participant_in, current_user)
+    await crud.participant.type_and_status_names_checks(db, participant_in)
 
     participant = await crud.participant.create(db, obj_in=participant_in)
     return await crud.participant.from_db_model_to_schema(db, participant)
@@ -76,11 +73,8 @@ async def update_participant_by_id(
         )
 
     if participant_in.speaker_id:
-        participant_in.speaker_id = await crud.participant\
-                                              .before_create_or_update_speaker_checks_and_get_id(db,
-                                                                                                 participant_in,
-                                                                                                 current_user)
-    await crud.participant.before_create_or_update_type_and_status_names_checks(db, participant_in)
+        participant_in.speaker_id = await crud.participant.speaker_checks_and_get_id(db, participant_in, current_user)
+    await crud.participant.type_and_status_names_checks(db, participant_in)
 
     participant = await crud.participant.update(db, db_obj=db_participant, obj_in=participant_in)
     return await crud.participant.from_db_model_to_schema(db, participant)

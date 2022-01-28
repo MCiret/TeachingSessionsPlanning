@@ -49,6 +49,15 @@ async def test_remove_participant_type(db_tests: AsyncSession) -> None:
     assert removed_participant_type is None
 
 
+async def test_get_by_name(db_tests: AsyncSession) -> None:
+    db_p_type = await crud.participant_type.create(
+        db_tests,
+        obj_in=ParticipantTypeCreate(name=ut.random_lower_string(8), nb_session_week=3))
+
+    assert (await crud.participant_type.get_by_name(db_tests, name=db_p_type.name)).id == db_p_type.id
+    assert await crud.participant_type.get_by_name(db_tests, name=ut.random_lower_string(12)) is None
+
+
 async def test_get_max_nb_session_week(db_tests: AsyncSession) -> None:
     db_p_types = await crud.participant_type.get_multi(db_tests, limit=None)
     nb_session_week_list = [p_type.nb_session_week for p_type in db_p_types]

@@ -281,77 +281,70 @@ async def test_get_by_speaker_email(db_tests: AsyncSession) -> None:
     await crud.session.remove(db_tests, id=s_p4.id)
 
 
-async def test_before_create_update_participant_checks_and_get_id_curr_user_participant(db_tests: AsyncSession
-                                                                                        ) -> None:
+async def test_participant_checks_and_get_id_current_user_participant(db_tests: AsyncSession) -> None:
     session_in = SessionCreate(date=dt.date.today(), time=dt.datetime.now().time(),
                                participant_id=None, type_name="type name", status_name="status name")
     participant = await ut.create_random_participant(db_tests)
     assert await crud.session\
-                     .before_create_or_update_participant_checks_and_get_id(db_tests,
-                                                                            session_in,
-                                                                            current_user=participant) == participant.id
+                     .participant_checks_and_get_id(db_tests, session_in, current_user=participant) == participant.id
 
 
-async def test_before_create_update_participant_checks_and_get_id_curr_user_speaker(db_tests: AsyncSession) -> None:
+async def test_participant_checks_and_get_id_current_user_speaker(db_tests: AsyncSession) -> None:
     speaker = await ut.create_random_speaker(db_tests)
     participant = await ut.create_random_participant(db_tests)
     session_in = SessionCreate(date=dt.date.today(), time=dt.datetime.now().time(),
                                participant_id=participant.id, type_name="type name", status_name="status name")
-    assert await crud.session\
-                     .before_create_or_update_participant_checks_and_get_id(db_tests,
-                                                                            session_in,
-                                                                            current_user=speaker) == participant.id
+    assert await crud.session.participant_checks_and_get_id(db_tests, session_in,
+                                                            current_user=speaker) == participant.id
 
 
-async def test_before_create_update_participant_checks_and_get_id_curr_user_speaker_participant_id_none(db_tests: AsyncSession) -> None:  # noqa
+async def test_participant_checks_and_get_id_current_user_speaker_participant_id_none(db_tests: AsyncSession
+                                                                                      ) -> None:
     session_in = SessionCreate(date=dt.date.today(), time=dt.datetime.now().time(),
                                participant_id=None, type_name="type name", status_name="status name")
     speaker = await ut.create_random_speaker(db_tests)
     with pytest.raises(HTTPException) as he:
-        await crud.session.before_create_or_update_participant_checks_and_get_id(db_tests, session_in,
-                                                                                 current_user=speaker)
+        await crud.session.participant_checks_and_get_id(db_tests, session_in, current_user=speaker)
     assert "If you are not a Participant user, you have to set the participant_id value..." in str(he)
 
 
-async def test_before_create_update_participant_checks_and_get_id_curr_user_speaker_participant_id_not_exist(db_tests: AsyncSession, mocker) -> None:  # noqa
+async def test_participant_checks_and_get_id_current_user_speaker_participant_id_not_exist(db_tests: AsyncSession,
+                                                                                           mocker) -> None:
     session_in = SessionCreate(date=dt.date.today(), time=dt.datetime.now().time(),
                                participant_id=1, type_name="type name", status_name="status name")
     mock_get_participant = mocker.patch('app.crud.participant.get')
     mock_get_participant.return_value = False
     speaker = await ut.create_random_speaker(db_tests)
     with pytest.raises(HTTPException) as he:
-        await crud.session.before_create_or_update_participant_checks_and_get_id(db_tests, session_in,
-                                                                                 current_user=speaker)
+        await crud.session.participant_checks_and_get_id(db_tests, session_in, current_user=speaker)
     assert "A participant user with this id does not exist in the system..." in str(he)
     assert mock_get_participant.called
 
 
-async def test_before_create_update_type_and_status_names_checks(db_tests: AsyncSession, mocker) -> None:
+async def test_type_and_status_names_checks(db_tests: AsyncSession, mocker) -> None:
     session_in = SessionUpdate(type_name="some type", status_name="some status")
     mocker_type_get_by_name = mocker.patch('app.crud.session_type.get_by_name')
     mocker_type_get_by_name.return_value = True
     mocker_status_get_by_name = mocker.patch('app.crud.session_status.get_by_name')
     mocker_status_get_by_name.return_value = True
     # assert None is returned (and so no exception was raised)
-    assert await crud.session.before_create_or_update_type_and_status_names_checks(db_tests, session_in) is None
+    assert await crud.session.type_and_status_names_checks(db_tests, session_in) is None
 
 
-async def test_before_create_update_type_and_status_names_checks_type_and_status_not_set(db_tests: AsyncSession
-                                                                                         ) -> None:
+async def test_type_and_status_names_checks_type_and_status_not_set(db_tests: AsyncSession) -> None:
     """When updating a Session, type and status names fields could not be set."""
     session_in = SessionUpdate()
-    assert await crud.session.before_create_or_update_type_and_status_names_checks(db_tests, session_in) is None
+    assert await crud.session.type_and_status_names_checks(db_tests, session_in) is None
 
 
-async def test_before_create_update_type_and_status_names_checks_type_not_existing(db_tests: AsyncSession, mocker
-                                                                                   ) -> None:
+async def test_type_and_status_names_checks_type_not_existing(db_tests: AsyncSession, mocker) -> None:
     session_in = SessionUpdate(type_name="some type", status_name="some status")
     mocker_type_get_by_name = mocker.patch('app.crud.session_type.get_by_name')
     mocker_type_get_by_name.return_value = False
     mocker_status_get_by_name = mocker.patch('app.crud.session_status.get_by_name')
     mocker_status_get_by_name.return_value = True
     with pytest.raises(HTTPException) as he:
-        await crud.session.before_create_or_update_type_and_status_names_checks(db_tests, session_in)
+        await crud.session.type_and_status_names_checks(db_tests, session_in)
     assert f"Type {session_in.type_name} does not exists..." in str(he)
 
 
@@ -362,7 +355,7 @@ async def test_type_and_status_names_checks_status_not_existing(db_tests: AsyncS
     mocker_status_get_by_name = mocker.patch('app.crud.session_status.get_by_name')
     mocker_status_get_by_name.return_value = False
     with pytest.raises(HTTPException) as he:
-        await crud.session.before_create_or_update_type_and_status_names_checks(db_tests, session_in)
+        await crud.session.type_and_status_names_checks(db_tests, session_in)
     assert f"Status {session_in.status_name} does not exists..." in str(he)
 
 

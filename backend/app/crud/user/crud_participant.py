@@ -49,9 +49,8 @@ class CRUDParticipant(CRUDUser[Participant, ParticipantCreate, ParticipantUpdate
 
         return obj_in_data
 
-    async def before_create_or_update_speaker_checks_and_get_id(self, db: AsyncSession,
-                                                                obj_in: ParticipantCreate | ParticipantUpdate,
-                                                                current_user: User) -> int | None:
+    async def speaker_checks_and_get_id(self, db: AsyncSession, obj_in: ParticipantCreate | ParticipantUpdate,
+                                        current_user: User) -> int | None:
         """
         To set the participant.speaker_id to the current user's id if it is a speaker user.
         Else, if it is an admin user, to check if the speaker_id (for participant creating/updating) is set
@@ -68,9 +67,8 @@ class CRUDParticipant(CRUDUser[Participant, ParticipantCreate, ParticipantUpdate
         else:
             return obj_in.speaker_id
 
-    async def before_create_or_update_type_and_status_names_checks(self, db: AsyncSession,
-                                                                   obj_in: ParticipantCreate | ParticipantUpdate
-                                                                   ) -> None:
+    async def type_and_status_names_checks(self, db: AsyncSession,
+                                           obj_in: ParticipantCreate | ParticipantUpdate) -> None:
         """To checks if the type and status names (used for participant creating/updating) exists in db."""
         if obj_in.type_name and not await crud.participant_type.get_by_name(db, name=obj_in.type_name):
             raise HTTPException(

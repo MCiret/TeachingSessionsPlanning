@@ -44,3 +44,12 @@ async def test_remove_session_status(db_tests: AsyncSession) -> None:
     await crud.session_status.remove(db_tests, id=created_session_status.id)
     removed_session_status = await crud.session_status.get(db_tests, id=created_session_status.id)
     assert removed_session_status is None
+
+
+async def test_get_by_name(db_tests: AsyncSession) -> None:
+    db_s_status = await crud.session_status.create(
+        db_tests,
+        obj_in=SessionStatusCreate(name=ut.random_lower_string(8)))
+
+    assert (await crud.session_status.get_by_name(db_tests, name=db_s_status.name)).id == db_s_status.id
+    assert await crud.session_status.get_by_name(db_tests, name=ut.random_lower_string(12)) is None

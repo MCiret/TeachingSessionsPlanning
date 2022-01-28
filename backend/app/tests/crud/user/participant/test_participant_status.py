@@ -45,3 +45,12 @@ async def test_remove_participant_status(db_tests: AsyncSession) -> None:
     await crud.participant_status.remove(db_tests, id=created_participant_status.id)
     removed_participant_status = await crud.participant_status.get(db_tests, id=created_participant_status.id)
     assert removed_participant_status is None
+
+
+async def test_get_by_name(db_tests: AsyncSession) -> None:
+    db_p_status = await crud.participant_status.create(
+        db_tests,
+        obj_in=ParticipantStatusCreate(name=ut.random_lower_string(8)))
+
+    assert (await crud.participant_status.get_by_name(db_tests, name=db_p_status.name)).id == db_p_status.id
+    assert await crud.participant_status.get_by_name(db_tests, name=ut.random_lower_string(12)) is None

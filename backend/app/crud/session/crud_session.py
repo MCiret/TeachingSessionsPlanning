@@ -11,7 +11,6 @@ from app import crud
 from app.models import Session, Participant, User
 from app.schemas import SessionCreate, SessionUpdate
 from app.schemas import Session as SessionSchema
-from app.utils import add_time
 
 
 class CRUDSession(CRUDBase[Session, SessionCreate, SessionUpdate]):
@@ -43,45 +42,14 @@ class CRUDSession(CRUDBase[Session, SessionCreate, SessionUpdate]):
         return (await db.execute(select(self.model)
                                  .where(self.model.date == date, self.model.time == time))).scalars().all()
 
-    async def is_whole_slot_time_free(self,  db: AsyncSession, *, obj_in: SessionCreate | SessionUpdate) -> bool:
-        """Checks if speaker is really free for the session to be create..."""
-
-        obj_in_speaker = await crud.speaker.get_by_participant_id(db, participant_id=obj_in.participant_id)
-
-        # If speaker has not a corresponding availability, no need to check more :
-        if not crud.availability.get_one_around_date_same_weekday_time_speaker(db, obj_in_speaker.id, obj_in.date,
-                                                                                  obj_in.time):
-            return False
-
-        # Else, speaker has a corresponding availability => check if it is free (i.e no other session) :
-        speaker_day_free_times = await crud.speaker.get_day_free_times(db, bd_obj=obj_in_speaker, data=obj_in.date)
-        if obj_in.time in speaker_day_free_times:
-            obj_in_participant_nb_session_week = await crud.participant\
-                                                           .get_nb_session_week(db, id=obj_in.participant_id)
-            # session start time is free and participant has 1 session week => simplest case
-            if obj_in_participant_nb_session_week < 2:
-                return True
-            # session start time is free but participant has more than 1 session week
-            # => check if the whole slot time if free :
-            else:
-                for i in range(1, obj_in_participant_nb_session_week):
-                    time_to_check = add_time(date=obj_in.date, time=obj_in.time,
-                                             minutes_to_add=i * obj_in_speaker.slot_time)
-                    if time_to_check not in speaker_day_free_times:
-                        return False
-                return True
-        else:
-            return False
-
     async def create(self, db: AsyncSession, *, obj_in: SessionCreate) -> Session:
         return await super().create(db, obj_in=await self.from_schema_to_db_model(db, obj_in=obj_in))
 
     async def update(self, db: AsyncSession, *, db_obj: Session, obj_in: SessionUpdate | dict[str, Any]) -> Session:
         return await super().update(db, db_obj=db_obj, obj_in=await self.from_schema_to_db_model(db, obj_in=obj_in))
 
-    async def before_create_or_update_participant_checks_and_get_id(self, db: AsyncSession,
-                                                                    obj_in: SessionCreate | SessionUpdate,
-                                                                    current_user: User) -> int | None:
+    async def participant_checks_and_get_id(self, db: AsyncSession, obj_in: SessionCreate | SessionUpdate,
+                                            current_user: User) -> int | None:
         """
         To set the session.participant_id to the current user's id if it is participant user.
         Else, if it is a speaker user, to check if the participant_id (for session creating/updating) is set if
@@ -99,8 +67,7 @@ class CRUDSession(CRUDBase[Session, SessionCreate, SessionUpdate]):
         else:
             return obj_in.participant_id
 
-    async def before_create_or_update_type_and_status_names_checks(self, db: AsyncSession,
-                                                                   obj_in: SessionCreate | SessionUpdate) -> None:
+    async def type_and_status_names_checks(self, db: AsyncSession, obj_in: SessionCreate | SessionUpdate) -> None:
         """To checks if the type and status names (used for session creating/updating) exists in db."""
         if obj_in.type_name and not await crud.session_type.get_by_name(db, name=obj_in.type_name):
             raise HTTPException(

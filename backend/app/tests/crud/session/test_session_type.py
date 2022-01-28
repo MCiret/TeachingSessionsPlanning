@@ -42,3 +42,12 @@ async def test_remove_session_type(db_tests: AsyncSession) -> None:
     await crud.session_type.remove(db_tests, id=created_session_type.id)
     removed_session_type = await crud.session_type.get(db_tests, id=created_session_type.id)
     assert removed_session_type is None
+
+
+async def test_get_by_name(db_tests: AsyncSession) -> None:
+    db_s_type = await crud.session_type.create(
+        db_tests,
+        obj_in=SessionTypeCreate(name=ut.random_lower_string(8)))
+
+    assert (await crud.session_type.get_by_name(db_tests, name=db_s_type.name)).id == db_s_type.id
+    assert await crud.session_type.get_by_name(db_tests, name=ut.random_lower_string(12)) is None
