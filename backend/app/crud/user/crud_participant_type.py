@@ -7,7 +7,7 @@ from app.schemas import ParticipantTypeCreate, ParticipantTypeUpdate
 
 
 class CRUDParticipantType(CRUDBase[ParticipantType, ParticipantTypeCreate, ParticipantTypeUpdate]):
-    async def get_by_name(self, db: AsyncSession, *, name: str) -> ParticipantType | None:
+    async def get_by_name(self, db: AsyncSession, name: str) -> ParticipantType | None:
         db_obj = await db.execute(select(self.model).where(self.model.name == name))
         return db_obj.scalar()
 

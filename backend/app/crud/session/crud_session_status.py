@@ -7,7 +7,7 @@ from app.schemas import SessionStatusCreate, SessionStatusUpdate
 
 
 class CRUDSessionStatus(CRUDBase[SessionStatus, SessionStatusCreate, SessionStatusUpdate]):
-    async def get_by_name(self, db: AsyncSession, *, name: str) -> SessionStatus | None:
+    async def get_by_name(self, db: AsyncSession, name: str) -> SessionStatus | None:
         db_obj = await db.execute(select(self.model).where(self.model.name == name))
         return db_obj.scalar()
 

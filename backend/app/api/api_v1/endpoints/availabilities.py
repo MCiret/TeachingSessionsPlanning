@@ -78,7 +78,7 @@ async def create_availability(
                             f"{from_weekday_int_to_str(avail_in.week_day)} at "
                             f"{avail_in.time} between {avail_in.start_date} and {avail_in.end_date}.")
                 )
-    if await crud.availability.has_too_close_previous(db, current_user.id, avail_in):
+    if await crud.availability.has_too_close_previous(db, speaker_id=current_user.id, obj_in=avail_in):
         raise HTTPException(
                     status_code=400,
                     detail=(f"Sorry, cannot create because at least one availability already exists on a "
@@ -87,7 +87,7 @@ async def create_availability(
                             f"at an earlier time but that overlaps {avail_in.time} "
                             f"because of duration = {current_user.slot_time} minutes.")
                 )
-    if await crud.availability.has_too_close_next(db, current_user.id, avail_in):
+    if await crud.availability.has_too_close_next(db, speaker_id=current_user.id, obj_in=avail_in):
         raise HTTPException(
                     status_code=400,
                     detail=(f"Sorry, cannot create because at least one availability already exists on a "

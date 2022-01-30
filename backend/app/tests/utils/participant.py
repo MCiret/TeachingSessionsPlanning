@@ -8,8 +8,8 @@ from app.schemas import ParticipantCreate, ParticipantUpdate
 from app.tests import utils as ut
 
 
-async def create_random_participant(db: AsyncSession, email: str = None, api_key: str = None, speaker_id: int = None,
-                                    p_type_name: str = None) -> Participant:
+async def create_random_participant(db: AsyncSession, *, email: str = None, api_key: str = None,
+                                    speaker_id: int = None, p_type_name: str = None) -> Participant:
     if speaker_id is None:
         speaker_id = (await ut.create_random_speaker(db)).id
     if email is None:

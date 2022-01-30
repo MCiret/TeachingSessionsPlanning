@@ -6,7 +6,7 @@ from app.schemas import SpeakerCreate, SpeakerUpdate
 import app.tests.utils as ut
 
 
-async def create_random_speaker(db: AsyncSession, email: str = None, api_key: str = None,
+async def create_random_speaker(db: AsyncSession, *, email: str = None, api_key: str = None,
                                 slot_time: int = None) -> models.Speaker:
     if email is None:
         email = ut.random_email()

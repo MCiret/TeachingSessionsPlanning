@@ -202,30 +202,29 @@ class TestCrudAvailabilityOne:
         spk1_id = db_avails["speaker1"].id
         # thursday
         assert (await crud.availability
-                          .get_by_weekday_time_speaker(db_tests, speaker_id=spk1_id,
-                                                       week_day=1,
-                                                       time=dt.time(9, 30)))[0].id == db_avails["avail3_spk1"].id
+                          .get_by_weekday_time_speaker(db_tests, 1, dt.time(9, 30),
+                                                       spk1_id))[0].id == db_avails["avail3_spk1"].id
         # thursday
         assert (await crud.availability
-                          .get_by_weekday_time_speaker(db_tests, speaker_id=spk1_id, week_day=1,
-                                                       time=dt.time(9)))[0].id == db_avails["avail1_spk1"].id
+                          .get_by_weekday_time_speaker(db_tests, 1, dt.time(9),
+                                                       spk1_id))[0].id == db_avails["avail1_spk1"].id
         # tuesday
         assert (await crud.availability
-                          .get_by_weekday_time_speaker(db_tests, speaker_id=spk1_id, week_day=3,
-                                                       time=dt.time(10)))[0].id == db_avails["avail2_spk1"].id
+                          .get_by_weekday_time_speaker(db_tests, 3, dt.time(10),
+                                                       spk1_id))[0].id == db_avails["avail2_spk1"].id
         # tuesday
         assert not await crud.availability\
-                             .get_by_weekday_time_speaker(db_tests, speaker_id=spk1_id, week_day=3, time=dt.time(11))
+                             .get_by_weekday_time_speaker(db_tests, 3, dt.time(11), spk1_id)
         # thursday
         assert not await crud.availability\
-                             .get_by_weekday_time_speaker(db_tests, speaker_id=spk1_id, week_day=1, time=dt.time(11))
+                             .get_by_weekday_time_speaker(db_tests, 1, dt.time(11), spk1_id)
 
     async def test_get_by_weekday_speaker(self, db_avails, db_tests: AsyncSession) -> None:
         spk1_id = db_avails["speaker1"].id
         spk2_id = db_avails["speaker2"].id
         # thursday
         thursday_avails = await crud.availability\
-                                    .get_by_weekday_speaker(db_tests, speaker_id=spk1_id, week_day=1)
+                                    .get_by_weekday_speaker(db_tests, 1, spk1_id)
         assert len(thursday_avails) == 2
         av_spk_ids = [av.speaker_id for av in thursday_avails]
         assert spk1_id in av_spk_ids
@@ -235,19 +234,19 @@ class TestCrudAvailabilityOne:
 
         # tuesday
         tuesday_avails = await crud.availability\
-                                   .get_by_weekday_speaker(db_tests, speaker_id=spk1_id, week_day=3)
+                                   .get_by_weekday_speaker(db_tests, 3, spk1_id)
         assert len(tuesday_avails) == 1
         assert tuesday_avails[0].speaker_id == spk1_id
         assert tuesday_avails[0].week_day == 3
 
         # friday
         assert not await crud.availability\
-                             .get_by_weekday_speaker(db_tests, speaker_id=spk1_id, week_day=4)
+                             .get_by_weekday_speaker(db_tests, 4, spk1_id)
         assert not await crud.availability\
-                             .get_by_weekday_speaker(db_tests, speaker_id=spk2_id, week_day=4)
+                             .get_by_weekday_speaker(db_tests, 4, spk1_id)
         # thursday
         thursday_spk2_avails = await crud.availability\
-                                         .get_by_weekday_speaker(db_tests, speaker_id=spk2_id, week_day=1)
+                                         .get_by_weekday_speaker(db_tests, 1, spk2_id)
         assert len(thursday_spk2_avails) == 1
         assert thursday_spk2_avails[0].speaker_id == spk2_id
         assert thursday_spk2_avails[0].week_day == 1
@@ -270,11 +269,11 @@ class TestCrudAvailabilityOne:
         avail_in_5 = AvailabilityCreate(start_date=dt.date(2022, 6, 25), end_date=dt.date(2022, 8, 25),
                                         week_day=1, time=dt.time(8, 30))
 
-        assert not await crud.availability.has_too_close_previous(db_tests, spk1_id, obj_in=avail_in_1)
-        assert not await crud.availability.has_too_close_previous(db_tests, spk1_id, obj_in=avail_in_2)
-        assert not await crud.availability.has_too_close_previous(db_tests, spk1_id, obj_in=avail_in_3)
-        assert not await crud.availability.has_too_close_previous(db_tests, spk1_id, obj_in=avail_in_4)
-        assert not await crud.availability.has_too_close_previous(db_tests, spk1_id, obj_in=avail_in_5)
+        assert not await crud.availability.has_too_close_previous(db_tests, speaker_id=spk1_id, obj_in=avail_in_1)
+        assert not await crud.availability.has_too_close_previous(db_tests, speaker_id=spk1_id, obj_in=avail_in_2)
+        assert not await crud.availability.has_too_close_previous(db_tests, speaker_id=spk1_id, obj_in=avail_in_3)
+        assert not await crud.availability.has_too_close_previous(db_tests, speaker_id=spk1_id, obj_in=avail_in_4)
+        assert not await crud.availability.has_too_close_previous(db_tests, speaker_id=spk1_id, obj_in=avail_in_5)
 
         spk2_id = db_avails["speaker2"].id
         # thursday
@@ -283,9 +282,9 @@ class TestCrudAvailabilityOne:
         # wednesday
         avail_in_7 = AvailabilityCreate(start_date=dt.date(2022, 3, 25), end_date=dt.date(2022, 6, 25),
                                         week_day=2, time=dt.time(14))
-        assert not await crud.availability.has_too_close_previous(db_tests, spk2_id, obj_in=avail_in_1)
-        assert not await crud.availability.has_too_close_previous(db_tests, spk2_id, obj_in=avail_in_6)
-        assert not await crud.availability.has_too_close_previous(db_tests, spk2_id, obj_in=avail_in_7)
+        assert not await crud.availability.has_too_close_previous(db_tests, speaker_id=spk2_id, obj_in=avail_in_1)
+        assert not await crud.availability.has_too_close_previous(db_tests, speaker_id=spk2_id, obj_in=avail_in_6)
+        assert not await crud.availability.has_too_close_previous(db_tests, speaker_id=spk2_id, obj_in=avail_in_7)
 
     async def test_has_too_close_previous_true(self, db_avails, db_tests: AsyncSession) -> None:
         spk1_id = db_avails["speaker1"].id
@@ -298,15 +297,15 @@ class TestCrudAvailabilityOne:
         # tuesday
         avail_in_3 = AvailabilityCreate(start_date=dt.date(2021, 12, 25), end_date=dt.date(2022, 3, 25),
                                         week_day=3, time=dt.time(10, 25))
-        assert await crud.availability.has_too_close_previous(db_tests, spk1_id, obj_in=avail_in_1)
-        assert await crud.availability.has_too_close_previous(db_tests, spk1_id, obj_in=avail_in_2)
-        assert await crud.availability.has_too_close_previous(db_tests, spk1_id, obj_in=avail_in_3)
+        assert await crud.availability.has_too_close_previous(db_tests, speaker_id=spk1_id, obj_in=avail_in_1)
+        assert await crud.availability.has_too_close_previous(db_tests, speaker_id=spk1_id, obj_in=avail_in_2)
+        assert await crud.availability.has_too_close_previous(db_tests, speaker_id=spk1_id, obj_in=avail_in_3)
 
         spk2_id = db_avails["speaker2"].id
         # thursday
         avail_in_4 = AvailabilityCreate(start_date=dt.date(2021, 12, 25), end_date=dt.date(2022, 4, 25),
                                         week_day=1, time=dt.time(11, 15))
-        assert await crud.availability.has_too_close_previous(db_tests, spk2_id, obj_in=avail_in_4)
+        assert await crud.availability.has_too_close_previous(db_tests, speaker_id=spk2_id, obj_in=avail_in_4)
 
     async def test_has_too_close_next_false(self, db_avails, db_tests: AsyncSession) -> None:
         spk1_id = db_avails["speaker1"].id
@@ -325,17 +324,17 @@ class TestCrudAvailabilityOne:
         # thursday
         avail_in_5 = AvailabilityCreate(start_date=dt.date(2022, 7, 25), end_date=dt.date(2022, 10, 25),
                                         week_day=1, time=dt.time(10))
-        assert not await crud.availability.has_too_close_next(db_tests, spk1_id, obj_in=avail_in_1)
-        assert not await crud.availability.has_too_close_next(db_tests, spk1_id, obj_in=avail_in_2)
-        assert not await crud.availability.has_too_close_next(db_tests, spk1_id, obj_in=avail_in_3)
-        assert not await crud.availability.has_too_close_next(db_tests, spk1_id, obj_in=avail_in_4)
-        assert not await crud.availability.has_too_close_next(db_tests, spk1_id, obj_in=avail_in_5)
+        assert not await crud.availability.has_too_close_next(db_tests, speaker_id=spk1_id, obj_in=avail_in_1)
+        assert not await crud.availability.has_too_close_next(db_tests, speaker_id=spk1_id, obj_in=avail_in_2)
+        assert not await crud.availability.has_too_close_next(db_tests, speaker_id=spk1_id, obj_in=avail_in_3)
+        assert not await crud.availability.has_too_close_next(db_tests, speaker_id=spk1_id, obj_in=avail_in_4)
+        assert not await crud.availability.has_too_close_next(db_tests, speaker_id=spk1_id, obj_in=avail_in_5)
 
         spk2_id = db_avails["speaker2"].id
         # thursday
         avail_in_6 = AvailabilityCreate(start_date=dt.date(2021, 12, 25), end_date=dt.date(2022, 4, 25),
                                         week_day=1, time=dt.time(10, 40))
-        assert not await crud.availability.has_too_close_next(db_tests, spk2_id, obj_in=avail_in_6)
+        assert not await crud.availability.has_too_close_next(db_tests, speaker_id=spk2_id, obj_in=avail_in_6)
 
     async def test_has_too_close_next_true(self, db_avails, db_tests: AsyncSession) -> None:
         spk1_id = db_avails["speaker1"].id
@@ -355,11 +354,11 @@ class TestCrudAvailabilityOne:
         avail_in_5 = AvailabilityCreate(start_date=dt.date(2021, 10, 25), end_date=dt.date(2022, 8, 25),
                                         week_day=3, time=dt.time(9, 50))
 
-        assert await crud.availability.has_too_close_next(db_tests, spk1_id, obj_in=avail_in_1)
-        assert await crud.availability.has_too_close_next(db_tests, spk1_id, obj_in=avail_in_2)
-        assert await crud.availability.has_too_close_next(db_tests, spk1_id, obj_in=avail_in_3)
-        assert await crud.availability.has_too_close_next(db_tests, spk1_id, obj_in=avail_in_4)
-        assert await crud.availability.has_too_close_next(db_tests, spk1_id, obj_in=avail_in_5)
+        assert await crud.availability.has_too_close_next(db_tests, speaker_id=spk1_id, obj_in=avail_in_1)
+        assert await crud.availability.has_too_close_next(db_tests, speaker_id=spk1_id, obj_in=avail_in_2)
+        assert await crud.availability.has_too_close_next(db_tests, speaker_id=spk1_id, obj_in=avail_in_3)
+        assert await crud.availability.has_too_close_next(db_tests, speaker_id=spk1_id, obj_in=avail_in_4)
+        assert await crud.availability.has_too_close_next(db_tests, speaker_id=spk1_id, obj_in=avail_in_5)
 
         spk2_id = db_avails["speaker2"].id
         # thursday
@@ -368,8 +367,8 @@ class TestCrudAvailabilityOne:
         # thursday
         avail_in_7 = AvailabilityCreate(start_date=dt.date(2021, 10, 25), end_date=dt.date(2022, 8, 25),
                                         week_day=1, time=dt.time(10, 50))
-        assert await crud.availability.has_too_close_next(db_tests, spk2_id, obj_in=avail_in_6)
-        assert await crud.availability.has_too_close_next(db_tests, spk2_id, obj_in=avail_in_7)
+        assert await crud.availability.has_too_close_next(db_tests, speaker_id=spk2_id, obj_in=avail_in_6)
+        assert await crud.availability.has_too_close_next(db_tests, speaker_id=spk2_id, obj_in=avail_in_7)
 
 
 class TestCrudAvailabilityTwo:

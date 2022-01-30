@@ -16,7 +16,7 @@ class CRUDParticipant(CRUDUser[Participant, ParticipantCreate, ParticipantUpdate
     async def get_multi(self, db: AsyncSession, *, skip: int = 0, limit: int = 100) -> list[Participant]:
         return (await db.execute(select(self.model).offset(skip).limit(limit))).scalars().all()
 
-    async def get_nb_session_week(self, db: AsyncSession, *, id) -> int:
+    async def get_nb_session_week(self, db: AsyncSession, id) -> int:
         return (await db.execute(select(ParticipantType.nb_session_week)
                                  .join(self.model, self.model.type_id == ParticipantType.id)
                                  .where(self.model.id == id))).scalar()
@@ -38,19 +38,19 @@ class CRUDParticipant(CRUDUser[Participant, ParticipantCreate, ParticipantUpdate
 
         if obj_in_data.get("type_name"):
             obj_in_data.update([
-                ("type_id", (await crud.participant_type.get_by_name(db, name=obj_in.type_name)).id)
+                ("type_id", (await crud.participant_type.get_by_name(db, obj_in.type_name)).id)
             ])
             del obj_in_data["type_name"]
         if obj_in_data.get("status_name"):
             obj_in_data.update([
-                ("status_id", (await crud.participant_status.get_by_name(db, name=obj_in.status_name)).id)
+                ("status_id", (await crud.participant_status.get_by_name(db, obj_in.status_name)).id)
             ])
             del obj_in_data["status_name"]
 
         return obj_in_data
 
     async def speaker_checks_and_get_id(self, db: AsyncSession, obj_in: ParticipantCreate | ParticipantUpdate,
-                                        current_user: User) -> int | None:
+                                        *, current_user: User) -> int | None:
         """
         To set the participant.speaker_id to the current user's id if it is a speaker user.
         Else, if it is an admin user, to check if the speaker_id (for participant creating/updating) is set
@@ -70,10 +70,10 @@ class CRUDParticipant(CRUDUser[Participant, ParticipantCreate, ParticipantUpdate
     async def type_and_status_names_checks(self, db: AsyncSession,
                                            obj_in: ParticipantCreate | ParticipantUpdate) -> None:
         """To checks if the type and status names (used for participant creating/updating) exists in db."""
-        if obj_in.type_name and not await crud.participant_type.get_by_name(db, name=obj_in.type_name):
+        if obj_in.type_name and not await crud.participant_type.get_by_name(db, obj_in.type_name):
             raise HTTPException(
                 status_code=400, detail=f"Type {obj_in.type_name} does not exists...")
-        if obj_in.status_name and not await crud.participant_status.get_by_name(db, name=obj_in.status_name):
+        if obj_in.status_name and not await crud.participant_status.get_by_name(db, obj_in.status_name):
             raise HTTPException(
                 status_code=400, detail=f"Status {obj_in.status_name} does not exists...")
 

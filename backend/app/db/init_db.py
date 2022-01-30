@@ -22,27 +22,27 @@ async def initialize_db(db: AsyncSession) -> None:
         await crud.admin.create(db, obj_in=user_in)  # noqa: F841
 
     # Create status and types (needed for participant creation) :
-    for pt in settings.PARTICIPANT_TYPES_NB_SESSION_WEEK:
-        p_type = await crud.participant_type.get_by_name(db, name=pt)
+    for pt_name in settings.PARTICIPANT_TYPES_NB_SESSION_WEEK:
+        p_type = await crud.participant_type.get_by_name(db, pt_name)
         if not p_type:
-            p_type = schemas.ParticipantTypeCreate(name=pt,
-                                                   nb_session_week=settings.PARTICIPANT_TYPES_NB_SESSION_WEEK[pt])
+            p_type = schemas.ParticipantTypeCreate(name=pt_name,
+                                                   nb_session_week=settings.PARTICIPANT_TYPES_NB_SESSION_WEEK[pt_name])
             await crud.participant_type.create(db, obj_in=p_type)
-    for ps in settings.PARTICIPANT_STATUS:
-        p_status = await crud.participant_status.get_by_name(db, name=ps)
+    for ps_name in settings.PARTICIPANT_STATUS:
+        p_status = await crud.participant_status.get_by_name(db, ps_name)
         if not p_status:
-            p_status = schemas.ParticipantStatusCreate(name=ps)
+            p_status = schemas.ParticipantStatusCreate(name=ps_name)
             await crud.participant_status.create(db, obj_in=p_status)
 
     # Create status and types (needed for session creation) :
-    for st in settings.SESSION_TYPES:
-        s_type = await crud.session_type.get_by_name(db, name=st)
+    for st_name in settings.SESSION_TYPES:
+        s_type = await crud.session_type.get_by_name(db, st_name)
         if not s_type:
-            s_type = schemas.SessionTypeCreate(name=st)
+            s_type = schemas.SessionTypeCreate(name=st_name)
             await crud.session_type.create(db, obj_in=s_type)
 
-    for ss in settings.SESSION_STATUS:
-        s_status = await crud.session_status.get_by_name(db, name=ss)
+    for ss_name in settings.SESSION_STATUS:
+        s_status = await crud.session_status.get_by_name(db, ss_name)
         if not s_status:
-            s_status = schemas.SessionStatusCreate(name=ss)
+            s_status = schemas.SessionStatusCreate(name=ss_name)
             await crud.session_status.create(db, obj_in=s_status)

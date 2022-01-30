@@ -8,7 +8,7 @@ from app.schemas import AdminCreate
 import app.tests.utils as ut
 
 
-async def create_random_admin(db: AsyncSession, email: str = None, api_key: str = None) -> Admin:
+async def create_random_admin(db: AsyncSession, *, email: str = None, api_key: str = None) -> Admin:
     if email is None:
         email = ut.random_email()
     if api_key is None:

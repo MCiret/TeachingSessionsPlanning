@@ -101,8 +101,8 @@ class CRUDAvailability(CRUDBase[Availability, AvailabilityCreate, AvailabilityUp
         """
         return [av.time for av in await self.get_all_around_date_same_weekday_speaker(db, speaker_id, date=date)]
 
-    async def get_by_weekday_time_speaker(self, db: AsyncSession, *, speaker_id: int, week_day: int,
-                                          time: dt.time) -> list[Availability]:
+    async def get_by_weekday_time_speaker(self, db: AsyncSession, week_day: int,
+                                          time: dt.time, speaker_id: int) -> list[Availability]:
         """
         Return all speaker's availabilities that correspond to the weekday and time.
         Useful to then compare with a period... see is_same_weekday_time_period_speaker() below.
@@ -112,7 +112,7 @@ class CRUDAvailability(CRUDBase[Availability, AvailabilityCreate, AvailabilityUp
                                         self.model.week_day == week_day,
                                         self.model.time == time))).scalars().all()
 
-    async def get_by_weekday_speaker(self, db: AsyncSession, *, speaker_id: int, week_day: int) -> list[Availability]:
+    async def get_by_weekday_speaker(self, db: AsyncSession, week_day: int, speaker_id: int) -> list[Availability]:
         """
         Return all speaker's availabilities that correspond to the weekday.
         Useful to then compare with a period... see is_same_weekday_period_speaker() below.
@@ -129,9 +129,7 @@ class CRUDAvailability(CRUDBase[Availability, AvailabilityCreate, AvailabilityUp
         between start & end date.
         Returns True if at least 1 availability exists... the obj_in can't be created.
         """
-        db_avails = await self.get_by_weekday_time_speaker(db, speaker_id=speaker_id,
-                                                           week_day=obj_in.week_day,
-                                                           time=obj_in.time)
+        db_avails = await self.get_by_weekday_time_speaker(db, obj_in.week_day, obj_in.time, speaker_id)
         for av in db_avails:
             if obj_in.start_date <= av.end_date:
                 if obj_in.start_date >= av.start_date:
@@ -151,7 +149,7 @@ class CRUDAvailability(CRUDBase[Availability, AvailabilityCreate, AvailabilityUp
         *Used by has_too_close_previous/next methods below to check if the obj_in can be created
         without overlaping (or being overlapped by) another availability.*
         """
-        db_avails = await self.get_by_weekday_speaker(db, speaker_id=speaker_id, week_day=obj_in.week_day)
+        db_avails = await self.get_by_weekday_speaker(db, obj_in.week_day, speaker_id)
         for av in db_avails:
             if obj_in.start_date <= av.end_date:
                 if obj_in.start_date >= av.start_date:
@@ -161,14 +159,14 @@ class CRUDAvailability(CRUDBase[Availability, AvailabilityCreate, AvailabilityUp
                         return True
         return False
 
-    async def has_too_close_previous(self, db: AsyncSession, speaker_id: int,
+    async def has_too_close_previous(self, db: AsyncSession, *, speaker_id: int,
                                      obj_in: AvailabilityCreate) -> Availability | None:
         """
         Checks if the most close previous availability is at least 1 speaker's slot_time before the one to create.
         """
         speaker = await crud.speaker.get(db, id=speaker_id)
         if await self.is_same_weekday_period_speaker(db, speaker_id=speaker.id, obj_in=obj_in):
-            avails = await self.get_by_weekday_speaker(db, speaker_id=speaker_id, week_day=obj_in.week_day)
+            avails = await self.get_by_weekday_speaker(db, obj_in.week_day, speaker_id)
             # Calculate the time of the closest possible previous availability that would allow to create this obj_in
             # # No matter the date to calculate the time
             closest_possible_prev_time = subtract_time(date=dt.date.today(), time=obj_in.time,
@@ -178,14 +176,14 @@ class CRUDAvailability(CRUDBase[Availability, AvailabilityCreate, AvailabilityUp
                     return True
         return False
 
-    async def has_too_close_next(self, db: AsyncSession, speaker_id: int,
+    async def has_too_close_next(self, db: AsyncSession, *, speaker_id: int,
                                  obj_in: AvailabilityCreate) -> Availability | None:
         """
         Checks if the most close next availability is at least 1 speaker's slot_time after the one to create.
         """
         speaker = await crud.speaker.get(db, id=speaker_id)
         if await self.is_same_weekday_period_speaker(db, speaker_id=speaker.id, obj_in=obj_in):
-            avails = await self.get_by_weekday_speaker(db, speaker_id=speaker_id, week_day=obj_in.week_day)
+            avails = await self.get_by_weekday_speaker(db, obj_in.week_day, speaker_id)
             # Calculate the time of the closest possible next availability that would allow to create this obj_in
             # No matter the date to calculate the time
             closest_possible_next_time = add_time(date=dt.date.today(), time=obj_in.time,

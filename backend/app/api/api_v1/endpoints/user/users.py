@@ -30,7 +30,6 @@ async def read_all_users(
 
 @router.get("/me", response_model=schemas.User)
 async def read_user_me(
-    db: AsyncSession = Depends(deps.get_async_db),
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
@@ -71,9 +70,9 @@ async def update_user_me(
 
 @router.get("/{user_id}", response_model=schemas.User)
 async def read_user_by_id(
+    *, db: AsyncSession = Depends(deps.get_async_db),
     user_id: int,
     current_user: models.User = Depends(deps.get_current_active_admin_user),
-    db: AsyncSession = Depends(deps.get_async_db),
 ) -> Any:
     """
     Get a specific user by id.

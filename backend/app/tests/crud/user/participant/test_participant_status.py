@@ -52,5 +52,5 @@ async def test_get_by_name(db_tests: AsyncSession) -> None:
         db_tests,
         obj_in=ParticipantStatusCreate(name=ut.random_lower_string(8)))
 
-    assert (await crud.participant_status.get_by_name(db_tests, name=db_p_status.name)).id == db_p_status.id
-    assert await crud.participant_status.get_by_name(db_tests, name=ut.random_lower_string(12)) is None
+    assert (await crud.participant_status.get_by_name(db_tests, db_p_status.name)).id == db_p_status.id
+    assert await crud.participant_status.get_by_name(db_tests, ut.random_lower_string(12)) is None

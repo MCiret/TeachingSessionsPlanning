@@ -7,7 +7,7 @@ from app.schemas import ParticipantStatusCreate, ParticipantStatusUpdate
 
 
 class CRUDParticipantStatus(CRUDBase[ParticipantStatus, ParticipantStatusCreate, ParticipantStatusUpdate]):
-    async def get_by_name(self, db: AsyncSession, *, name: str) -> ParticipantStatus | None:
+    async def get_by_name(self, db: AsyncSession, name: str) -> ParticipantStatus | None:
         db_obj = await db.execute(select(self.model).where(self.model.name == name))
         return db_obj.scalar()
 

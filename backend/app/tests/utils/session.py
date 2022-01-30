@@ -9,7 +9,7 @@ from app.models import Session
 from app.tests import utils as ut
 
 
-async def create_random_session(db: AsyncSession, date_: dt.date = None, time_: dt.time = None,
+async def create_random_session(db: AsyncSession, *, date_: dt.date = None, time_: dt.time = None,
                                 participant_id: int = None) -> Session:
     if date_ is None:
         date_ = dt.date.today()

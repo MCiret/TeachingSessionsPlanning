@@ -187,8 +187,8 @@ async def test_from_schema_to_model_db_with_create_schema(db_tests: AsyncSession
     speaker = await ut.create_random_speaker(db_tests)
     p_type_name = ut.random_list_elem(list(settings.PARTICIPANT_TYPES_NB_SESSION_WEEK.keys()))
     p_status_name = ut.random_list_elem(settings.PARTICIPANT_STATUS)
-    db_p_type = await crud.participant_type.get_by_name(db_tests, name=p_type_name)
-    db_p_status = await crud.participant_status.get_by_name(db_tests, name=p_status_name)
+    db_p_type = await crud.participant_type.get_by_name(db_tests, p_type_name)
+    db_p_status = await crud.participant_status.get_by_name(db_tests, p_status_name)
     p_in = ParticipantCreate(
         email=ut.random_email(), type_name=p_type_name, status_name=p_status_name,
         speaker_id=speaker.id, api_key=ut.random_lower_string(32), first_name=ut.random_lower_string(6),
@@ -203,7 +203,7 @@ async def test_from_schema_to_model_db_with_create_schema(db_tests: AsyncSession
 
 async def test_from_schema_to_model_db_with_update_schema_type_name(db_tests: AsyncSession) -> None:
     p_type_name = ut.random_list_elem(list(settings.PARTICIPANT_TYPES_NB_SESSION_WEEK.keys()))
-    db_p_type = await crud.participant_type.get_by_name(db_tests, name=p_type_name)
+    db_p_type = await crud.participant_type.get_by_name(db_tests, p_type_name)
     p_in = ParticipantUpdate(type_name=p_type_name)
     p_dict = await crud.participant.from_schema_to_db_model(db_tests, obj_in=p_in)
     assert ("type_name" and "status_name" and "status_id") not in p_dict
@@ -213,7 +213,7 @@ async def test_from_schema_to_model_db_with_update_schema_type_name(db_tests: As
 
 async def test_from_schema_to_model_db_with_update_schema_status_name(db_tests: AsyncSession) -> None:
     p_status_name = ut.random_list_elem(settings.PARTICIPANT_STATUS)
-    db_p_status = await crud.participant_status.get_by_name(db_tests, name=p_status_name)
+    db_p_status = await crud.participant_status.get_by_name(db_tests, p_status_name)
     p_in = ParticipantUpdate(status_name=p_status_name)
     p_dict = await crud.participant.from_schema_to_db_model(db_tests, obj_in=p_in)
     assert ("type_name" and "status_name" and "type_id") not in p_dict
@@ -224,8 +224,8 @@ async def test_from_schema_to_model_db_with_update_schema_status_name(db_tests: 
 async def test_from_schema_to_model_db_with_update_schema(db_tests: AsyncSession) -> None:
     p_type_name = ut.random_list_elem(list(settings.PARTICIPANT_TYPES_NB_SESSION_WEEK.keys()))
     p_status_name = ut.random_list_elem(settings.PARTICIPANT_STATUS)
-    db_p_type = await crud.participant_type.get_by_name(db_tests, name=p_type_name)
-    db_p_status = await crud.participant_status.get_by_name(db_tests, name=p_status_name)
+    db_p_type = await crud.participant_type.get_by_name(db_tests, p_type_name)
+    db_p_status = await crud.participant_status.get_by_name(db_tests, p_status_name)
     p_in = ParticipantUpdate(type_name=p_type_name, status_name=p_status_name)
     p_dict = await crud.participant.from_schema_to_db_model(db_tests, obj_in=p_in)
     assert ("type_name" and "status_name") not in p_dict
@@ -237,5 +237,5 @@ async def test_from_schema_to_model_db_with_update_schema(db_tests: AsyncSession
 async def test_get_nb_session_week(db_tests: AsyncSession) -> None:
     participant = await ut.create_random_participant(db_tests)
     nb_session_week = (await crud.participant_type.get(db_tests, id=participant.type_id)).nb_session_week
-    p_nb_session_week = await crud.participant.get_nb_session_week(db_tests, id=participant.id)
+    p_nb_session_week = await crud.participant.get_nb_session_week(db_tests, participant.id)
     assert nb_session_week == p_nb_session_week

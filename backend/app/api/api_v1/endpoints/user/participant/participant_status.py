@@ -38,7 +38,7 @@ async def create_participant_status(
     A user who would use this function should update PARTICIPANT_STATUS list in core/config.py.
     **Allowed for admin user only.**
     """
-    if await crud.participant_status.get_by_name(db, name=status_in.name):
+    if await crud.participant_status.get_by_name(db, status_in.name):
         raise HTTPException(
             status_code=400,
             detail="A participant status with this name already exists in the system...",
@@ -68,7 +68,7 @@ async def update_participant_status_by_id(
             status_code=404,
             detail="A participant status with this id does not exist in the system...",
         )
-    if status_in.name and await crud.participant_status.get_by_name(db, name=status_in.name):
+    if status_in.name and await crud.participant_status.get_by_name(db, status_in.name):
         raise HTTPException(
             status_code=400,
             detail="A participant status with this name already exists in the system...",

@@ -39,9 +39,9 @@ async def read_sessions_mine(
     **Allowed for speaker or participant user only.**
     """
     if current_user.profile == "participant":
-        db_sessions = await crud.session.get_by_participant_email(db, participant_email=current_user.email)
+        db_sessions = await crud.session.get_by_participant_email(db, current_user.email)
     if current_user.profile == "speaker":
-        db_sessions = await crud.session.get_by_speaker_email(db, speaker_email=current_user.email)
+        db_sessions = await crud.session.get_by_speaker_email(db, current_user.email)
     sessions = []
     for db_p in db_sessions:
         sessions.append(await crud.session.from_db_model_to_schema(db, db_p))
@@ -59,19 +59,21 @@ async def create_session(
     Create new session and send an email to the concerned participant.
     **Allowed for speaker or participant user only.**
     """
-    # for sessions with same date and time
-    for sessions in await crud.session.get_by_date_and_time(db, date=session_in.date, time=session_in.time):
-        session_in_speaker_id = (await crud.participant.get(db, id=session_in.participant_id)).speaker_id
-        for session in sessions:
-            # if a same time and date session also have the same speaker id
-            if session.participant.speaker_id == session_in_speaker_id:
-                raise HTTPException(
-                    status_code=400,
-                    detail="A session with same date, time and speaker already exists in the system...",
-                )
-    session_in.participant_id = await crud.session.participant_checks_and_get_id(db, session_in, current_user)
-    await crud.session.type_and_status_names_checks(db, session_in)
+    session_in.participant_id = await crud.session.participant_checks_and_get_id(db, session_in,
+                                                                                 current_user=current_user)
+    if current_user.profile == "speaker":
+        speaker = current_user
+    elif current_user.profile == "participant":
+        speaker = await crud.speaker.get_by_participant_id(db, current_user.id)
 
+    if not await crud.speaker.is_free_for_session(db, speaker, session_in):
+        raise HTTPException(
+                    status_code=400,
+                    detail=("Cannot create this session. Please, check if Speaker has corresponding availability "
+                            "and if there is no session that already exists...")
+                )
+
+    await crud.session.type_and_status_names_checks(db, session_in)
     session = await crud.session.create(db, obj_in=session_in)
     # if settings.EMAILS_ENABLED and user_in.email:
     #     send_new_account_email(

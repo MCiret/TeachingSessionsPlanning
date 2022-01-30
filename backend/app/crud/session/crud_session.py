@@ -21,24 +21,24 @@ class CRUDSession(CRUDBase[Session, SessionCreate, SessionUpdate]):
     #                             .join(self.model, Participant.id == self.model.participant_id)
     #                             .where(self.model.participant_id == db_obj.participant_id))).scalar()
 
-    async def get_by_participant_email(self, db: AsyncSession, *, participant_email: str) -> list[Session]:
+    async def get_by_participant_email(self, db: AsyncSession, participant_email: str) -> list[Session]:
         participant_id = (await crud.user.get_by_email(db, email=participant_email)).id
         return (await db.execute(select(self.model)
                                  .where(self.model.participant_id == participant_id))).scalars().all()
 
-    async def get_by_speaker_email(self, db: AsyncSession, *, speaker_email: str) -> list[Session]:
+    async def get_by_speaker_email(self, db: AsyncSession, speaker_email: str) -> list[Session]:
         speaker_id = (await crud.user.get_by_email(db, email=speaker_email)).id
         return (await db.execute(select(self.model)
                                  .join(Participant, self.model.participant_id == Participant.id)
                                  .where(Participant.speaker_id == speaker_id))).scalars().all()
 
-    async def get_by_date_speaker(self, db: AsyncSession, *, speaker_id: int, date: dt.date) -> list[Session]:
+    async def get_by_date_speaker(self, db: AsyncSession, date: dt.date, speaker_id: int) -> list[Session]:
         return (await db.execute(select(self.model)
                                  .join(Participant, self.model.participant_id == Participant.id)
                                  .where(Participant.speaker_id == speaker_id, self.model.date == date))).scalars()\
                                                                                                         .all()
 
-    async def get_by_date_and_time(self, db: AsyncSession, *, date: dt.date, time: dt.time) -> list[Session] | None:
+    async def get_by_date_and_time(self, db: AsyncSession, date: dt.date, time: dt.time) -> list[Session] | None:
         return (await db.execute(select(self.model)
                                  .where(self.model.date == date, self.model.time == time))).scalars().all()
 
@@ -49,11 +49,11 @@ class CRUDSession(CRUDBase[Session, SessionCreate, SessionUpdate]):
         return await super().update(db, db_obj=db_obj, obj_in=await self.from_schema_to_db_model(db, obj_in=obj_in))
 
     async def participant_checks_and_get_id(self, db: AsyncSession, obj_in: SessionCreate | SessionUpdate,
-                                            current_user: User) -> int | None:
+                                            *, current_user: User) -> int | None:
         """
-        To set the session.participant_id to the current user's id if it is participant user.
+        Set the session.participant_id to the current user's id if it is participant user.
         Else, if it is a speaker user, to check if the participant_id (for session creating/updating) is set if
-        and if this participant_id exists in db.
+        and if this participant_id exists in db and if the participant's speaker is this speaker user.
         """
         if await crud.user.is_participant(current_user):
             return current_user.id
@@ -64,15 +64,20 @@ class CRUDSession(CRUDBase[Session, SessionCreate, SessionUpdate]):
         elif not await crud.participant.get(db, id=obj_in.participant_id):
             raise HTTPException(
                 status_code=400, detail="A participant user with this id does not exist in the system...")
+        elif (await crud.participant.get(db, id=obj_in.participant_id)).speaker_id != current_user.id:
+            raise HTTPException(
+                        status_code=400,
+                        detail="The participant with this id is not one of yours...",
+                    )
         else:
             return obj_in.participant_id
 
     async def type_and_status_names_checks(self, db: AsyncSession, obj_in: SessionCreate | SessionUpdate) -> None:
         """To checks if the type and status names (used for session creating/updating) exists in db."""
-        if obj_in.type_name and not await crud.session_type.get_by_name(db, name=obj_in.type_name):
+        if obj_in.type_name and not await crud.session_type.get_by_name(db, obj_in.type_name):
             raise HTTPException(
                 status_code=400, detail=f"Type {obj_in.type_name} does not exists...")
-        if obj_in.status_name and not await crud.session_status.get_by_name(db, name=obj_in.status_name):
+        if obj_in.status_name and not await crud.session_status.get_by_name(db, obj_in.status_name):
             raise HTTPException(
                 status_code=400, detail=f"Status {obj_in.status_name} does not exists...")
 
@@ -84,12 +89,12 @@ class CRUDSession(CRUDBase[Session, SessionCreate, SessionUpdate]):
             obj_in_data = jsonable_encoder(obj_in, exclude_unset=True)
         if obj_in_data.get("type_name"):
             obj_in_data.update([
-                ("type_id", (await crud.session_type.get_by_name(db, name=obj_in.type_name)).id)
+                ("type_id", (await crud.session_type.get_by_name(db, obj_in.type_name)).id)
             ])
             del obj_in_data["type_name"]
         if obj_in_data.get("status_name"):
             obj_in_data.update([
-                ("status_id", (await crud.session_status.get_by_name(db, name=obj_in.status_name)).id)
+                ("status_id", (await crud.session_status.get_by_name(db, obj_in.status_name)).id)
             ])
             del obj_in_data["status_name"]
         if obj_in_data.get("date"):

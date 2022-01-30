@@ -37,7 +37,7 @@ async def create_participant_type(
     A user who would use this function should update PARTICIPANT_TYPES_NB_SESSION_WEEK dict in core/config.py.
     **Allowed for admin user only.**
     """
-    if await crud.participant_type.get_by_name(db, name=type_in.name):
+    if await crud.participant_type.get_by_name(db, type_in.name):
         raise HTTPException(
             status_code=400,
             detail="A participant type with this name already exists in the system...",
@@ -67,7 +67,7 @@ async def update_participant_type_by_id(
             status_code=404,
             detail="A participant type with this id does not exist in the system...",
         )
-    if type_in.name and await crud.participant_type.get_by_name(db, name=type_in.name):
+    if type_in.name and await crud.participant_type.get_by_name(db, type_in.name):
         raise HTTPException(
             status_code=400,
             detail="A participant type with this name already exists in the system...",

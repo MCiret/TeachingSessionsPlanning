@@ -53,7 +53,7 @@ async def test_remove_speaker(db_tests: AsyncSession) -> None:
 async def test_get_by_participant_id(db_tests: AsyncSession) -> None:
     speaker = await ut.create_random_speaker(db_tests)
     participant = await ut.create_random_participant(db_tests, speaker_id=speaker.id)
-    db_speaker = await crud.speaker.get_by_participant_id(db_tests, participant_id=participant.id)
+    db_speaker = await crud.speaker.get_by_participant_id(db_tests, participant.id)
     assert db_speaker.id == speaker.id
 
 
