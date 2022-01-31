@@ -24,8 +24,7 @@ async def read_all_users(
     Returns only users (base table) common fields.
     **Allowed for admin user only.**
     """
-    users = await crud.user.get_multi(db, skip=skip, limit=limit)
-    return users
+    return await crud.user.get_multi(db, skip=skip, limit=limit)
 
 
 @router.get("/me", response_model=schemas.User)
@@ -64,8 +63,7 @@ async def update_user_me(
         if await crud.user.get_by_email(db, email=email):
             raise HTTPException(status_code=400, detail="A user with this email already exists in the system...")
         user_in.email = email
-    user = await crud.user.update(db, db_obj=current_user, obj_in=user_in)
-    return user
+    return await crud.user.update(db, db_obj=current_user, obj_in=user_in)
 
 
 @router.get("/{user_id}", response_model=schemas.User)
@@ -107,5 +105,4 @@ async def create_user_open(
             detail="The user with this username already exists in the system",
         )
     user_in = schemas.UserCreate(api_key=api_key, email=email, first_name=first_name, last_name=last_name)
-    user = await crud.user.create(db, obj_in=user_in)
-    return user
+    return await crud.user.create(db, obj_in=user_in)

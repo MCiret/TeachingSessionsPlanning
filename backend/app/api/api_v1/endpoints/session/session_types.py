@@ -19,8 +19,7 @@ async def read_session_types(
     """
     **Allowed for admin user only.**
     """
-    types = await crud.session_type.get_multi(db, skip=skip, limit=limit)
-    return types
+    return await crud.session_type.get_multi(db, skip=skip, limit=limit)
 
 
 @router.post("/type", response_model=schemas.SessionType)
@@ -42,8 +41,7 @@ async def create_session_type(
             status_code=400,
             detail="A session type with this name already exists in the system...",
         )
-    type = await crud.session_type.create(db, obj_in=type_in)
-    return type
+    return await crud.session_type.create(db, obj_in=type_in)
 
 
 @router.put("/type/{type_id}", response_model=schemas.SessionType)
@@ -72,5 +70,4 @@ async def update_session_type_by_id(
             status_code=400,
             detail="A session type with this name already exists in the system...",
         )
-    type = await crud.session_type.update(db, db_obj=db_type, obj_in=type_in)
-    return type
+    return await crud.session_type.update(db, db_obj=db_type, obj_in=type_in)

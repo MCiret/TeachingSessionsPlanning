@@ -20,8 +20,7 @@ async def read_participant_status(
     """
     **Allowed for admin user only.**
     """
-    status = await crud.participant_status.get_multi(db, skip=skip, limit=limit)
-    return status
+    return await crud.participant_status.get_multi(db, skip=skip, limit=limit)
 
 
 @router.post("/status", response_model=schemas.ParticipantStatus)
@@ -43,8 +42,7 @@ async def create_participant_status(
             status_code=400,
             detail="A participant status with this name already exists in the system...",
         )
-    status = await crud.participant_status.create(db, obj_in=status_in)
-    return status
+    return await crud.participant_status.create(db, obj_in=status_in)
 
 
 @router.put("/status/{status_id}", response_model=schemas.ParticipantStatus)
@@ -73,5 +71,4 @@ async def update_participant_status_by_id(
             status_code=400,
             detail="A participant status with this name already exists in the system...",
         )
-    status = await crud.participant_status.update(db, db_obj=db_status, obj_in=status_in)
-    return status
+    return await crud.participant_status.update(db, db_obj=db_status, obj_in=status_in)

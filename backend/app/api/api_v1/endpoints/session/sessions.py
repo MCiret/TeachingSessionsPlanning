@@ -101,5 +101,4 @@ async def create_session(
 #             status_code=404,
 #             detail="A session with this id does not exist in the system...",
 #         )
-#     session = await crud.session.update(db, db_obj=db_session, obj_in=session_in)
-#     return session
+#     return await crud.session.update(db, db_obj=db_session, obj_in=session_in)

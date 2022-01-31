@@ -19,8 +19,7 @@ async def read_participant_types(
     """
     **Allowed for admin user only.**
     """
-    types = await crud.participant_type.get_multi(db, skip=skip, limit=limit)
-    return types
+    return await crud.participant_type.get_multi(db, skip=skip, limit=limit)
 
 
 @router.post("/type", response_model=schemas.ParticipantType)
@@ -42,8 +41,7 @@ async def create_participant_type(
             status_code=400,
             detail="A participant type with this name already exists in the system...",
         )
-    type = await crud.participant_type.create(db, obj_in=type_in)
-    return type
+    return await crud.participant_type.create(db, obj_in=type_in)
 
 
 @router.put("/type/{type_id}", response_model=schemas.ParticipantType)
@@ -72,5 +70,4 @@ async def update_participant_type_by_id(
             status_code=400,
             detail="A participant type with this name already exists in the system...",
         )
-    type = await crud.participant_type.update(db, db_obj=db_type, obj_in=type_in)
-    return type
+    return await crud.participant_type.update(db, db_obj=db_type, obj_in=type_in)

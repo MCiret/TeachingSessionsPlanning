@@ -177,7 +177,8 @@ async def test_update_participant_by_id_by_admin_or_speaker(async_client: AsyncC
                                 headers=speaker_token_headers, json=data)
     assert r.status_code == 200 and r2.status_code == 200
     assert "Sandra" in r.json().values() and "Sandra" in r2.json().values()
-    # db_tests (i.e SQLAlchemy AsyncSession) is not closed before the end of the tests session
+    # db_tests (i.e SQLAlchemy AsyncSession) is not closed before the end of the tests session.
+    # Refreshing is required to "actualize" updated db_object(s) and access it in this current session :
     await db_tests.refresh(db_participant)
     await db_tests.refresh(db_participant2)
     assert (await crud.participant.get(db_tests, id=db_participant.id)).first_name == "Sandra"

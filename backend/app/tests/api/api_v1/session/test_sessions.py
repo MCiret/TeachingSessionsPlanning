@@ -119,7 +119,7 @@ async def test_create_session_by_participant(async_client: AsyncClient, db_tests
 
 @pytest.mark.is_free_bool(True)
 async def test_create_session_by_speaker(async_client: AsyncClient, db_tests: AsyncSession,
-                                             mock_spk_is_free, db_session_type_status) -> None:
+                                         mock_spk_is_free, db_session_type_status) -> None:
     s_type = db_session_type_status["s_type"]
     s_status = db_session_type_status["s_status"]
     speaker = await ut.create_random_speaker(db_tests)

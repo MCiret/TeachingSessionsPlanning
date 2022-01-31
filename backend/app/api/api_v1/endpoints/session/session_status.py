@@ -20,8 +20,7 @@ async def read_session_status(
     """
     **Allowed for super admin/user only.**
     """
-    status = await crud.session_status.get_multi(db, skip=skip, limit=limit)
-    return status
+    return await crud.session_status.get_multi(db, skip=skip, limit=limit)
 
 
 @router.post("/status", response_model=schemas.SessionStatus)
@@ -43,8 +42,7 @@ async def create_session_status(
             status_code=400,
             detail="A session status with this name already exists in the system...",
         )
-    status = await crud.session_status.create(db, obj_in=status_in)
-    return status
+    return await crud.session_status.create(db, obj_in=status_in)
 
 
 @router.put("/status/{status_id}", response_model=schemas.SessionStatus)
@@ -74,5 +72,4 @@ async def update_session_status_by_id(
             status_code=400,
             detail="A session status with this name already exists in the system...",
         )
-    status = await crud.session_status.update(db, db_obj=db_status, obj_in=status_in)
-    return status
+    return await crud.session_status.update(db, db_obj=db_status, obj_in=status_in)

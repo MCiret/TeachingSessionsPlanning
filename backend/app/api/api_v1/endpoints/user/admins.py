@@ -20,8 +20,7 @@ async def read_admins(
     Read all admin users in db.
     **Allowed for admin user only.**
     """
-    admins = await crud.admin.get_multi(db, skip=skip, limit=limit)
-    return admins
+    return await crud.admin.get_multi(db, skip=skip, limit=limit)
 
 
 @router.post("/admin", response_model=schemas.Admin)
@@ -41,8 +40,7 @@ async def create_admin(
             status_code=400,
             detail="A user with this email already exists in the system...",
         )
-    admin = await crud.admin.create(db, obj_in=admin_in)
-    return admin
+    return await crud.admin.create(db, obj_in=admin_in)
 
 
 @router.put("/admin/{admin_id}", response_model=schemas.Admin)
@@ -66,5 +64,4 @@ async def update_admin_by_id(
             status_code=404,
             detail="An admin user with this id does not exist in the system...",
         )
-    admin = await crud.admin.update(db, db_obj=db_admin, obj_in=admin_in)
-    return admin
+    return await crud.admin.update(db, db_obj=db_admin, obj_in=admin_in)

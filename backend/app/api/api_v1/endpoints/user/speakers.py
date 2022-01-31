@@ -20,8 +20,7 @@ async def read_speakers(
     Read all speaker users in db.
     **Allowed for admin user only.**
     """
-    speakers = await crud.speaker.get_multi(db, skip=skip, limit=limit)
-    return speakers
+    return await crud.speaker.get_multi(db, skip=skip, limit=limit)
 
 
 @router.post("/speaker", response_model=schemas.Speaker)
@@ -41,8 +40,7 @@ async def create_speaker(
             status_code=400,
             detail="A user with this email already exists in the system...",
         )
-    speaker = await crud.speaker.create(db, obj_in=speaker_in)
-    return speaker
+    return await crud.speaker.create(db, obj_in=speaker_in)
 
 
 @router.put("/speaker/{speaker_id}", response_model=schemas.Speaker)
@@ -66,5 +64,4 @@ async def update_speaker(
             status_code=404,
             detail="A speaker user with this id does not exist in the system...",
         )
-    speaker = await crud.speaker.update(db, db_obj=db_speaker, obj_in=speaker_in)
-    return speaker
+    return await crud.speaker.update(db, db_obj=db_speaker, obj_in=speaker_in)

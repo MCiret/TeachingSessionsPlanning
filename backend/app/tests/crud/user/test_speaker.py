@@ -125,17 +125,17 @@ async def db_data2(db_tests: AsyncSession, db_data) -> ParticipantType:
                                 week_day=3,
                                 time=dt.time(9))
     av1b_in = AvailabilityCreate(start_date=dt.date(2021, 12, 1),
-                                end_date=dt.date(2022, 3, 31),
-                                week_day=3,
-                                time=dt.time(9, 30))
+                                 end_date=dt.date(2022, 3, 31),
+                                 week_day=3,
+                                 time=dt.time(9, 30))
     av2_in = AvailabilityCreate(start_date=dt.date(2022, 2, 1),
                                 end_date=dt.date(2022, 5, 31),
                                 week_day=3,
                                 time=dt.time(10))
     av2b_in = AvailabilityCreate(start_date=dt.date(2022, 2, 1),
-                                end_date=dt.date(2022, 5, 31),
-                                week_day=3,
-                                time=dt.time(10, 30))
+                                 end_date=dt.date(2022, 5, 31),
+                                 week_day=3,
+                                 time=dt.time(10, 30))
     av3_in = AvailabilityCreate(start_date=dt.date(2022, 3, 15),
                                 end_date=dt.date(2022, 7, 31),
                                 week_day=3,
@@ -217,49 +217,49 @@ async def test_is_free_for_session(db_tests: AsyncSession, db_data, db_data2) ->
     # Sessions to test before creating... :
     # tuesday 18/11/21 9:00 - 1 session week participant => none availability...
     s_in = SessionCreate(date=dt.date(2021, 11, 18), time=dt.time(9), participant_id=p_1sw_id,
-                          type_name="s_type_name", status_name="s_status_name")
+                         type_name="s_type_name", status_name="s_status_name")
     assert not await crud.speaker.is_free_for_session(db_tests, speaker, session_in=s_in)
 
     # tuesday 14/04/22 15:00 - 2 sessions week participant => none availability...
     s_in = SessionCreate(date=dt.date(2022, 4, 14), time=dt.time(15), participant_id=p_2sw_id,
-                          type_name="s_type_name", status_name="s_status_name")
+                         type_name="s_type_name", status_name="s_status_name")
     assert not await crud.speaker.is_free_for_session(db_tests, speaker, session_in=s_in)
 
     # tuesday 10/02/22 9:00 - 1 session week participant => availability + no session
     s_in = SessionCreate(date=dt.date(2022, 2, 10), time=dt.time(9), participant_id=p_1sw_id,
-                          type_name="s_type_name", status_name="s_status_name")
+                         type_name="s_type_name", status_name="s_status_name")
     assert await crud.speaker.is_free_for_session(db_tests, speaker, session_in=s_in)
 
     # tuesday 24/03/22 9:00 - 1 session week participant => availability but existing session
     s_in = SessionCreate(date=dt.date(2022, 3, 24), time=dt.time(9), participant_id=p_1sw_id,
-                          type_name="s_type_name", status_name="s_status_name")
+                         type_name="s_type_name", status_name="s_status_name")
     assert not await crud.speaker.is_free_for_session(db_tests, speaker, session_in=s_in)
 
     # tuesday 17/02/22 9:30 - 1 session week participant => availability but existing session
     s_in = SessionCreate(date=dt.date(2022, 2, 17), time=dt.time(9, 30), participant_id=p_1sw_id,
-                          type_name="s_type_name", status_name="s_status_name")
+                         type_name="s_type_name", status_name="s_status_name")
     assert not await crud.speaker.is_free_for_session(db_tests, speaker, session_in=s_in)
 
     # wednesday 11/05/22 10:00 - 2 sessions week participant => availability at 10:00 but not at 10:30
     s_in = SessionCreate(date=dt.date(2022, 5, 22), time=dt.time(10), participant_id=p_2sw_id,
-                          type_name="s_type_name", status_name="s_status_name")
+                         type_name="s_type_name", status_name="s_status_name")
     assert not await crud.speaker.is_free_for_session(db_tests, speaker, session_in=s_in)
 
     # wednesday 06/04/22 9:30 - 2 sessions week participant
     # => no availability at 9:30, availability at 10:00 but existing session
     s_in = SessionCreate(date=dt.date(2022, 5, 22), time=dt.time(10), participant_id=p_2sw_id,
-                          type_name="s_type_name", status_name="s_status_name")
+                         type_name="s_type_name", status_name="s_status_name")
     assert not await crud.speaker.is_free_for_session(db_tests, speaker, session_in=s_in)
 
     # tuesday 24/03/22 10:00 - 2 sessions week participant
     # => availability at 10:00 and 10:30 but existing session at 10:30
     s_in = SessionCreate(date=dt.date(2022, 3, 24), time=dt.time(10), participant_id=p_2sw_id,
-                          type_name="s_type_name", status_name="s_status_name")
+                         type_name="s_type_name", status_name="s_status_name")
     assert not await crud.speaker.is_free_for_session(db_tests, speaker, session_in=s_in)
 
     # tuesday 26/05/22 10:00 - 2 sessions week participant => availability at 10:00 and at 10:30 + no session
     s_in = SessionCreate(date=dt.date(2022, 5, 26), time=dt.time(10), participant_id=p_2sw_id,
-                          type_name="s_type_name", status_name="s_status_name")
+                         type_name="s_type_name", status_name="s_status_name")
     assert await crud.speaker.is_free_for_session(db_tests, speaker, session_in=s_in)
 
     await crud.session.remove(db_tests, id=s1.id)

@@ -2,6 +2,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import crud, schemas
 from app.core.config import settings
+# make sure all SQL Alchemy models are imported (app.db.base) before initializing DB
+# otherwise, SQL Alchemy might fail to initialize relationships properly
+# see https://github.com/tiangolo/full-stack-fastapi-postgresql/issues/28
 from app.db import base  # noqa
 
 

@@ -60,20 +60,17 @@ async def test_get_by_date_and_time(db_tests: AsyncSession) -> None:
     s_2b = await ut.create_random_session(db_tests, time_=dt.time(11, 30),
                                           date_=dt.date(2022, 1, 6))
 
-    jan_6_10_30_sessions = await crud.session.get_by_date_and_time(db_tests, dt.date(2022, 1, 6),
-                                                                             dt.time(10, 30))
+    jan_6_10_30_sessions = await crud.session.get_by_date_and_time(db_tests, dt.date(2022, 1, 6), dt.time(10, 30))
     sessions_id_list = [session.id for session in jan_6_10_30_sessions]
     assert s_1a.id in sessions_id_list
     assert s_2a.id in sessions_id_list
     assert s_1b.id not in sessions_id_list
     assert s_2b.id not in sessions_id_list
 
-    jan_7_11_30_sessions = await crud.session.get_by_date_and_time(db_tests, dt.date(2022, 1, 7),
-                                                                             dt.time(11, 30))
+    jan_7_11_30_sessions = await crud.session.get_by_date_and_time(db_tests, dt.date(2022, 1, 7), dt.time(11, 30))
     assert not jan_7_11_30_sessions
 
-    jan_7_10_30_sessions = await crud.session.get_by_date_and_time(db_tests, dt.date(2022, 1, 7),
-                                                                             dt.time(10, 30))
+    jan_7_10_30_sessions = await crud.session.get_by_date_and_time(db_tests, dt.date(2022, 1, 7), dt.time(10, 30))
     sessions_id_list = [session.id for session in jan_7_10_30_sessions]
     assert s_1a.id not in sessions_id_list
     assert s_2a.id not in sessions_id_list

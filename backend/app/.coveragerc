@@ -1,8 +1,0 @@
-[run]
-
-# https://coverage.readthedocs.io/en/latest/config.html
-# New in version 5.0.
-# concurrency (multi-string, default “thread”): the name concurrency libraries in use by the product code.
-# If your program uses multiprocessing, gevent, greenlet, or eventlet,
-# you must name that library in this option, or coverage.py will produce very wrong results.
-concurrency=greenlet

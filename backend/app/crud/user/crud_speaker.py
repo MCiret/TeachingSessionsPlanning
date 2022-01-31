@@ -59,7 +59,7 @@ class CRUDSpeaker(CRUDUser[Speaker, SpeakerCreate, SpeakerUpdate]):
          """
         # If speaker has not a corresponding availability, no need to check more :
         if not await crud.availability.get_one_around_date_same_weekday_time_speaker(db, db_obj.id, session_in.date,
-                                                                               session_in.time):
+                                                                                     session_in.time):
             return False
 
         # Else, speaker has a corresponding availability => check if it is free (i.e no other session) :
