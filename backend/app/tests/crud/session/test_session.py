@@ -553,45 +553,45 @@ async def test_type_and_status_names_checks_status_not_existing(db_tests: AsyncS
 #     await crud.participant_type.remove(db_tests, id=p_type_two_sessions_week.id)
 
 
-# class TestIsWholeSlotTimeFree:
-#     @pytest.fixture
-#     async def mocks_crud(self, request, mocker):
-#         mock_is_start_time = mocker.patch('app.crud.session.is_start_time_free')
-#         mock_is_start_time.return_value = request.node.get_closest_marker("start_time").args[0]
-#         # return mock_is_start_time
-#         mock_is_free_until_end = mocker.patch('app.crud.session.is_slot_time_free_until_end')
-#         mock_is_free_until_end.return_value = request.node.get_closest_marker("until_end").args[0]
-#         return {"mock_is_start_time": mock_is_start_time,
-#                 "mock_is_free_until_end": mock_is_free_until_end}
+class TestIsWholeSlotTimeFree:
+    @pytest.fixture
+    async def mocks_crud(self, request, mocker):
+        mock_is_start_time = mocker.patch('app.crud.session.is_start_time_free')
+        mock_is_start_time.return_value = request.node.get_closest_marker("start_time").args[0]
+        # return mock_is_start_time
+        mock_is_free_until_end = mocker.patch('app.crud.session.is_slot_time_free_until_end')
+        mock_is_free_until_end.return_value = request.node.get_closest_marker("until_end").args[0]
+        return {"mock_is_start_time": mock_is_start_time,
+                "mock_is_free_until_end": mock_is_free_until_end}
 
-#     session_in = SessionCreate(date=dt.date(2022, 1, 20), time=dt.time(10, 30),
-#                                participant_id=1, type_name="type name", status_name="status name")
+    session_in = SessionCreate(date=dt.date(2022, 1, 20), time=dt.time(10, 30),
+                               participant_id=1, type_name="type name", status_name="status name")
 
-#     @pytest.mark.until_end(True)
-#     @pytest.mark.start_time(True)
-#     async def test_is_whole_slot_time_free_true(self, db_tests: AsyncSession, mocks_crud) -> None:
-#         assert await crud.session.is_whole_slot_time_free(db_tests, obj_in=self.session_in)
-#         for m in mocks_crud:
-#             assert mocks_crud[m].called
+    @pytest.mark.until_end(True)
+    @pytest.mark.start_time(True)
+    async def test_is_whole_slot_time_free_true(self, db_tests: AsyncSession, mocks_crud) -> None:
+        assert await crud.session.is_whole_slot_time_free(db_tests, obj_in=self.session_in)
+        for m in mocks_crud:
+            assert mocks_crud[m].called
 
-#     @pytest.mark.until_end(True)
-#     @pytest.mark.start_time(False)
-#     async def test_is_whole_slot_time_free_false_start_time_false(self, db_tests: AsyncSession, mocks_crud) -> None:
-#         assert not await crud.session.is_whole_slot_time_free(db_tests, obj_in=self.session_in)
-#         assert mocks_crud["mock_is_start_time"].called
-#         assert not mocks_crud["mock_is_free_until_end"].called
+    @pytest.mark.until_end(True)
+    @pytest.mark.start_time(False)
+    async def test_is_whole_slot_time_free_false_start_time_false(self, db_tests: AsyncSession, mocks_crud) -> None:
+        assert not await crud.session.is_whole_slot_time_free(db_tests, obj_in=self.session_in)
+        assert mocks_crud["mock_is_start_time"].called
+        assert not mocks_crud["mock_is_free_until_end"].called
 
-#     @pytest.mark.until_end(False)
-#     @pytest.mark.start_time(True)
-#     async def test_is_whole_slot_time_free_false_time_until_end_false(self, db_tests: AsyncSession,
-#                                                                       mocks_crud) -> None:
-#         assert not await crud.session.is_whole_slot_time_free(db_tests, obj_in=self.session_in)
-#         assert mocks_crud["mock_is_start_time"].called
-#         assert mocks_crud["mock_is_free_until_end"].called
+    @pytest.mark.until_end(False)
+    @pytest.mark.start_time(True)
+    async def test_is_whole_slot_time_free_false_time_until_end_false(self, db_tests: AsyncSession,
+                                                                      mocks_crud) -> None:
+        assert not await crud.session.is_whole_slot_time_free(db_tests, obj_in=self.session_in)
+        assert mocks_crud["mock_is_start_time"].called
+        assert mocks_crud["mock_is_free_until_end"].called
 
-#     @pytest.mark.until_end(False)
-#     @pytest.mark.start_time(False)
-#     async def test_is_whole_slot_time_free_false_both_false(self, db_tests: AsyncSession, mocks_crud) -> None:
-#         assert not await crud.session.is_whole_slot_time_free(db_tests, obj_in=self.session_in)
-#         assert mocks_crud["mock_is_start_time"].called
-#         assert not mocks_crud["mock_is_free_until_end"].called
+    @pytest.mark.until_end(False)
+    @pytest.mark.start_time(False)
+    async def test_is_whole_slot_time_free_false_both_false(self, db_tests: AsyncSession, mocks_crud) -> None:
+        assert not await crud.session.is_whole_slot_time_free(db_tests, obj_in=self.session_in)
+        assert mocks_crud["mock_is_start_time"].called
+        assert not mocks_crud["mock_is_free_until_end"].called
