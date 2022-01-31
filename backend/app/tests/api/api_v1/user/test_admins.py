@@ -27,6 +27,7 @@ async def test_read_admins_by_admin(async_client: AsyncClient, db_tests: AsyncSe
 
 async def test_read_admins_by_not_admin(async_client: AsyncClient, db_tests: AsyncSession,
                                         speaker_token_headers: dict[str, str]) -> None:
+    """Unnecessary test that actually tests the Depends() which is already tested in test_deps.py."""
     await ut.create_random_participant(db_tests)
     await ut.create_random_speaker(db_tests)
     await ut.create_random_admin(db_tests)
@@ -67,6 +68,7 @@ async def test_create_admin_existing_email_by_admin(async_client: AsyncClient, d
 
 async def test_create_admin_by_not_admin(async_client: AsyncClient, db_tests: AsyncSession,
                                          speaker_token_headers: dict[str, str]) -> None:
+    """Unnecessary test that actually tests the Depends() which is already tested in test_deps.py."""
     email = ut.random_email()
     data = jsonable_encoder(AdminCreate(email=email,
                                         api_key=ut.random_lower_string(32),
@@ -117,6 +119,7 @@ async def test_update_admin_by_id_not_existing_by_admin(async_client: AsyncClien
 
 async def test_update_admin_by_id_by_not_admin(async_client: AsyncClient, db_tests: AsyncSession,
                                                speaker_token_headers: dict[str, str]) -> None:
+    """Unnecessary test that actually tests the Depends() which is already tested in test_deps.py."""
     db_admin = await ut.create_random_admin(db_tests)
     data = jsonable_encoder(AdminUpdate(first_name="Sandra"), exclude_unset=True)
     r = await async_client.put(f"{settings.API_V1_STR}/users/admin/{db_admin.id}",

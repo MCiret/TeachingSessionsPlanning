@@ -31,10 +31,10 @@ async def create_participant_type(
     current_user: models.User = Depends(deps.get_current_active_admin_user),
 ) -> Any:
     """
-    **⚠️** Participant types are created in initialize_db() function by running execution of the init_db_data module
-    (prerequisite step before running this app).<br>
-    However, if a user would like to create (or update, see below), he has to uncomment this function.
-    A user who would use this function should update PARTICIPANT_TYPES_NB_SESSION_WEEK dict in core/config.py.
+    **⚠️** Participant types are created during prerequisite 'init_db_data' module execution which uses set values
+    in PARTICIPANT_TYPES_NB_SESSION_WEEK dict (core/config.py).<br>
+    However, if a user would like to create a participant type, he has to uncomment this endpoint function
+    and update PARTICIPANT_TYPES_NB_SESSION_WEEK dict to update API doc.
     **Allowed for admin user only.**
     """
     if await crud.participant_type.get_by_name(db, type_in.name):
@@ -55,10 +55,10 @@ async def update_participant_type_by_id(
     current_user: models.User = Depends(deps.get_current_active_admin_user),
 ) -> Any:
     """
-    **⚠️** Participant types are created in initialize_db() function by running execution of the init_db_data module
-    (prerequisite step before running this app).<br>
-    However, if a user would like to update (or create, see above), he has to uncomment this function.
-    A user who would use this function should update PARTICIPANT_TYPES_NB_SESSION_WEEK dict in core/config.py.
+    **⚠️** Participant types are created during prerequisite 'init_db_data' module execution which uses set values
+    in PARTICIPANT_TYPES_NB_SESSION_WEEK dict (core/config.py).<br>
+    However, if a user would like to update a participant type, he has to uncomment this endpoint function
+    and update PARTICIPANT_TYPES_NB_SESSION_WEEK dict to update API doc.
     **Allowed for admin user only.**
     """
     db_type = await crud.participant_type.get(db, id=type_id)

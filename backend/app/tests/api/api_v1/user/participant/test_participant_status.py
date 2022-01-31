@@ -26,6 +26,7 @@ async def test_read_participant_statuss_by_admin(async_client: AsyncClient, db_t
 
 async def test_read_participant_status_by_not_admin(async_client: AsyncClient, db_tests: AsyncSession,
                                                     speaker_token_headers: dict[str, str]) -> None:
+    """Unnecessary test that actually tests the Depends() which is already tested in test_deps.py."""
     await crud.participant_status.create(db_tests, obj_in=ParticipantStatusCreate(name=ut.random_lower_string(10)))
     r = await async_client.get(f"{settings.API_V1_STR}/users/participants/status", headers=speaker_token_headers)
     assert r.status_code == 400
@@ -46,6 +47,7 @@ async def test_create_participant_status_by_admin(async_client: AsyncClient, db_
 
 async def test_create_participant_status_by_not_admin(async_client: AsyncClient,
                                                       speaker_token_headers: dict[str, str]) -> None:
+    """Unnecessary test that actually tests the Depends() which is already tested in test_deps.py."""
     name = ut.random_lower_string(10)
     data = jsonable_encoder(ParticipantStatusCreate(name=name))
     r = await async_client.post(f"{settings.API_V1_STR}/users/participants/status",
@@ -78,6 +80,7 @@ async def test_update_participant_status_by_id_by_admin(async_client: AsyncClien
 
 async def test_update_participant_status_by_id_by_not_admin(async_client: AsyncClient, db_tests: AsyncSession,
                                                             speaker_token_headers: dict[str, str]) -> None:
+    """Unnecessary test that actually tests the Depends() which is already tested in test_deps.py."""
     p_status = await crud.participant_status.create(db_tests,
                                                     obj_in=ParticipantStatusCreate(name=ut.random_lower_string(10)))
     data = jsonable_encoder(ParticipantStatusUpdate(), exclude_unset=True)

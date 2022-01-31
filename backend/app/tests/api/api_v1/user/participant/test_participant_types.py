@@ -30,6 +30,7 @@ async def test_read_participant_types_by_admin(async_client: AsyncClient, db_tes
 
 async def test_read_participant_types_by_not_admin(async_client: AsyncClient, db_tests: AsyncSession,
                                                    speaker_token_headers: dict[str, str]) -> None:
+    """Unnecessary test that actually tests the Depends() which is already tested in test_deps.py."""
     await crud.participant_type.create(db_tests, obj_in=ParticipantTypeCreate(name=ut.random_lower_string(10),
                                                                               nb_session_week=2))
     r = await async_client.get(f"{settings.API_V1_STR}/users/participants/types", headers=speaker_token_headers)
@@ -51,6 +52,7 @@ async def test_create_participant_type_by_admin(async_client: AsyncClient, db_te
 
 async def test_create_participant_type_by_not_admin(async_client: AsyncClient,
                                                     speaker_token_headers: dict[str, str]) -> None:
+    """Unnecessary test that actually tests the Depends() which is already tested in test_deps.py."""
     name = ut.random_lower_string(10)
     data = jsonable_encoder(ParticipantTypeCreate(name=name, nb_session_week=2))
     r = await async_client.post(f"{settings.API_V1_STR}/users/participants/type",
@@ -84,6 +86,7 @@ async def test_update_participant_type_by_id_by_admin(async_client: AsyncClient,
 
 async def test_update_participant_type_by_id_by_not_admin(async_client: AsyncClient, db_tests: AsyncSession,
                                                           speaker_token_headers: dict[str, str]) -> None:
+    """Unnecessary test that actually tests the Depends() which is already tested in test_deps.py."""
     p_type = await crud.participant_type.create(db_tests, obj_in=ParticipantTypeCreate(name=ut.random_lower_string(10),
                                                                                        nb_session_week=2))
     data = jsonable_encoder(ParticipantTypeUpdate(nb_session_week=p_type.nb_session_week + 1), exclude_unset=True)

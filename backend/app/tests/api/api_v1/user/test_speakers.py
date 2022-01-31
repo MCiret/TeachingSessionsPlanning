@@ -27,6 +27,7 @@ async def test_read_speakers_by_admin(async_client: AsyncClient, db_tests: Async
 
 async def test_read_speakers_by_not_admin(async_client: AsyncClient, db_tests: AsyncSession,
                                           speaker_token_headers: dict[str, str]) -> None:
+    """Unnecessary test that actually tests the Depends() which is already tested in test_deps.py."""
     await ut.create_random_participant(db_tests)
     await ut.create_random_speaker(db_tests)
     await ut.create_random_admin(db_tests)
@@ -68,6 +69,7 @@ async def test_create_speaker_existing_email_by_admin(async_client: AsyncClient,
 
 async def test_create_speaker_by_not_admin(async_client: AsyncClient, db_tests: AsyncSession,
                                            speaker_token_headers: dict[str, str]) -> None:
+    """Unnecessary test that actually tests the Depends() which is already tested in test_deps.py."""
     email = ut.random_email()
     data = jsonable_encoder(SpeakerCreate(email=email,
                                           api_key=ut.random_lower_string(32),
@@ -118,6 +120,7 @@ async def test_update_speaker_by_id_not_existing_by_admin(async_client: AsyncCli
 
 async def test_update_speaker_by_id_by_not_admin(async_client: AsyncClient, db_tests: AsyncSession,
                                                  speaker_token_headers: dict[str, str]) -> None:
+    """Unnecessary test that actually tests the Depends() which is already tested in test_deps.py."""
     db_speaker = await ut.create_random_speaker(db_tests)
     data = jsonable_encoder(SpeakerUpdate(first_name="Sandra"), exclude_unset=True)
     r = await async_client.put(f"{settings.API_V1_STR}/users/speaker/{db_speaker.id}",

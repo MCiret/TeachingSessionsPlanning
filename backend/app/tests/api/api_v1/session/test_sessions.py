@@ -33,6 +33,7 @@ async def test_read_sessions_by_admin_or_speaker(async_client: AsyncClient, db_t
 
 async def test_read_sessions_by_not_admin_nor_speaker(async_client: AsyncClient, db_tests: AsyncSession,
                                                       participant_token_headers: dict[str, str]) -> None:
+    """Unnecessary test that actually tests the Depends() which is already tested in test_deps.py."""
     s1 = await ut.create_random_session(db_tests)
     s2 = await ut.create_random_session(db_tests)
     s3 = await ut.create_random_session(db_tests)
@@ -71,6 +72,7 @@ async def test_read_sessions_mine_by_speaker_or_participant(async_client: AsyncC
 
 async def test_read_sessions_mine_by_not_speaker_nor_participant(async_client: AsyncClient,
                                                                  admin_token_headers: dict[str, str]) -> None:
+    """Unnecessary test that actually tests the Depends() which is already tested in test_deps.py."""
     r = await async_client.get(f"{settings.API_V1_STR}/sessions/mine", headers=admin_token_headers)
     assert r.status_code == 400
     assert "To do this, the user has to be a Speaker or Participant user" in r.json().values()

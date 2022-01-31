@@ -31,6 +31,7 @@ async def test_read_participants_by_admin_or_speaker(async_client: AsyncClient, 
 
 async def test_read_participants_by_not_admin_nor_speaker(async_client: AsyncClient, db_tests: AsyncSession,
                                                           participant_token_headers: dict[str, str]) -> None:
+    """Unnecessary test that actually tests the Depends() which is already tested in test_deps.py."""
     await ut.create_random_participant(db_tests)
     await ut.create_random_speaker(db_tests)
     await ut.create_random_admin(db_tests)
@@ -252,6 +253,7 @@ async def test_update_participant_by_id_not_existing_status_name_by_admin(async_
 
 async def test_update_participant_by_id_by_not_admin_nor_speaker(async_client: AsyncClient, db_tests: AsyncSession,
                                                                  participant_token_headers: dict[str, str]) -> None:
+    """Unnecessary test that actually tests the Depends() which is already tested in test_deps.py."""
     db_participant = await ut.create_random_participant(db_tests)
     data = jsonable_encoder(ParticipantUpdate(first_name="Sandra"), exclude_unset=True)
     r = await async_client.put(f"{settings.API_V1_STR}/users/participants/{db_participant.id}",

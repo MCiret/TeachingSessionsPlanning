@@ -31,6 +31,7 @@ async def test_read_all_users_by_admin(async_client: AsyncClient, db_tests: Asyn
 
 async def test_read_all_users_by_not_admin(async_client: AsyncClient, db_tests: AsyncSession,
                                            speaker_token_headers: dict[str, str]) -> None:
+    """Unnecessary test that actually tests the Depends() which is already tested in test_deps.py."""
     await ut.create_random_participant(db_tests)
     await ut.create_random_speaker(db_tests)
     await ut.create_random_admin(db_tests)
@@ -77,6 +78,7 @@ async def test_read_user_by_id_by_admin(async_client: AsyncClient, db_tests: Asy
 
 async def test_read_user_by_id_by_not_admin(async_client: AsyncClient, db_tests: AsyncSession,
                                             speaker_token_headers: dict[str, str]) -> None:
+    """Unnecessary test that actually tests the Depends() which is already tested in test_deps.py."""
     p = await ut.create_random_participant(db_tests)
     r = await async_client.get(f"{settings.API_V1_STR}/users/{p.id}", headers=speaker_token_headers)
     assert r.status_code == 400

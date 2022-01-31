@@ -32,10 +32,10 @@ async def create_participant_status(
     current_user: models.User = Depends(deps.get_current_active_admin_user),
 ) -> Any:
     """
-    **⚠️** Participant status are created in initialize_db() function by running execution of the init_db_data module
-    (prerequisite step before running this app).<br>
-    However, if a user would like to create (or update, see below), he has to uncomment this function.
-    A user who would use this function should update PARTICIPANT_STATUS list in core/config.py.
+    **⚠️** Participant status are created during prerequisite 'init_db_data' module execution which uses set values
+    in PARTICIPANT_STATUS list (core/config.py).<br>
+    However, if a user would like to create a participant status, he has to uncomment this endpoint function
+    and update PARTICIPANT_STATUS to update API doc.
     **Allowed for admin user only.**
     """
     if await crud.participant_status.get_by_name(db, status_in.name):
@@ -56,10 +56,10 @@ async def update_participant_status_by_id(
     current_user: models.User = Depends(deps.get_current_active_admin_user),
 ) -> Any:
     """
-    **⚠️** Participant status are created in initialize_db() function by running execution of the init_db_data module
-    (prerequisite step before running this app).<br>
-    However, if a user would like to update (or create, see above), he has to uncomment this function.
-    A user who would use this function should update PARTICIPANT_STATUS list in core/config.py.
+    **⚠️** Participant status are created during prerequisite 'init_db_data' module execution which uses set values
+    in PARTICIPANT_STATUS list (core/config.py).<br>
+    However, if a user would like to update a participant status, he has to uncomment this endpoint function
+    and update PARTICIPANT_STATUS to update API doc.
     **Allowed for admin user only.**
     """
     db_status = await crud.participant_status.get(db, id=status_id)

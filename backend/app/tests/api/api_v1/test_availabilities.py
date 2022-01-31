@@ -112,6 +112,7 @@ class TestEndpointsAvailabilities:
 
     async def test_read_availabilities_mine_by_not_speaker(self, async_client: AsyncClient,
                                                            admin_token_headers: dict[str, str]) -> None:
+        """Unnecessary test that actually tests the Depends() which is already tested in test_deps.py."""
         r = await async_client.get(f"{settings.API_V1_STR}/availabilities/mine", headers=admin_token_headers)
         assert r.status_code == 400
         assert "To do this, the user has to be a Speaker user" in r.json().values()
@@ -177,6 +178,7 @@ class TestEndpointsAvailabilities:
 
     async def test_create_availability_by_not_speaker(self, async_client: AsyncClient,
                                                       admin_token_headers: dict[str, str]) -> None:
+        """Unnecessary test that actually tests the Depends() which is already tested in test_deps.py."""
         data = jsonable_encoder(AvailabilityCreate(start_date=dt.date.today(),
                                                    end_date=(dt.date.today() + dt.timedelta(days=10)),
                                                    week_day=0, time=dt.time(10)))
