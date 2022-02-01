@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import crud, models
 from app.schemas import SpeakerCreate, SpeakerUpdate
-import app.tests.utils as ut
+import app.tests.utils_for_testing as ut
 
 
 async def create_random_speaker(db: AsyncSession, *, email: str = None, api_key: str = None,

@@ -6,7 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from app.core.config import settings
 from app import crud
 from app.schemas import AdminCreate, AdminUpdate
-from app.tests import utils as ut
+from app.tests import utils_for_testing as ut
 
 # This is the same as using the @pytest.mark.anyio on all test functions in the module
 pytestmark = pytest.mark.anyio
@@ -102,16 +102,11 @@ async def test_update_admin_by_id_existing_email_by_admin(async_client: AsyncCli
     assert "A user with this email already exists in the system..." in r.json().values()
 
 
-async def test_update_admin_by_id_not_existing_by_admin(async_client: AsyncClient, db_tests: AsyncSession,
+async def test_update_admin_by_id_not_existing_by_admin(async_client: AsyncClient,
                                                         admin_token_headers: dict[str, str]) -> None:
-    # get a not existing admin id
-    db_admins = await crud.admin.get_multi(db_tests)
-    if db_admins:
-        max_id = max([admin.id for admin in db_admins])
-    else:
-        max_id = 0
+
     data = jsonable_encoder(AdminUpdate(first_name="Sandra"), exclude_unset=True)
-    r = await async_client.put(f"{settings.API_V1_STR}/users/admin/{max_id + 1}",
+    r = await async_client.put(f"{settings.API_V1_STR}/users/admin/-1",
                                headers=admin_token_headers, json=data)
     assert r.status_code == 404
     assert "An admin user with this id does not exist in the system..." in r.json().values()

@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.encoders import jsonable_encoder
 
 from app.core.config import settings
-from app.tests import utils as ut
+from app.tests import utils_for_testing as ut
 from app import crud
 from app.schemas import SessionCreate, SessionTypeCreate, SessionStatusCreate
 

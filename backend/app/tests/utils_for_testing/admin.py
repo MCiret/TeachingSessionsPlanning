@@ -5,7 +5,7 @@ from app import crud
 from app.core.config import settings
 from app.models import Admin
 from app.schemas import AdminCreate
-import app.tests.utils as ut
+import app.tests.utils_for_testing as ut
 
 
 async def create_random_admin(db: AsyncSession, *, email: str = None, api_key: str = None) -> Admin:

@@ -1,3 +1,8 @@
+"""
+Not directly tested module (that is why it is 0% coverage)
+but the most important part (initialize_db() function) is tested somewhere else (see app/tests/db/).
+"""
+
 import logging
 import asyncio
 

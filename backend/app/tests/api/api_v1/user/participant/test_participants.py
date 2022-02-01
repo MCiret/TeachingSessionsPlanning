@@ -6,7 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from app.core.config import settings
 from app import crud
 from app.schemas import ParticipantCreate, ParticipantUpdate
-from app.tests import utils as ut
+from app.tests import utils_for_testing as ut
 
 # This is the same as using the @pytest.mark.anyio on all test functions in the module
 pytestmark = pytest.mark.anyio
@@ -109,20 +109,15 @@ async def test_create_participant_not_existing_status_name_by_admin(async_client
     assert not await crud.participant.get_by_email(db_tests, email=email)
 
 
-async def test_create_participant_not_existing_speaker_id_by_admin(async_client: AsyncClient, db_tests: AsyncSession,
+async def test_create_participant_not_existing_speaker_id_by_admin(async_client: AsyncClient,
                                                                    admin_token_headers: dict[str, str]) -> None:
-    # get a not existing speaker id
-    db_speakers = await crud.speaker.get_multi(db_tests)
-    if db_speakers:
-        max_id = max([speaker.id for speaker in db_speakers])
-    else:
-        max_id = 0
+
     data = jsonable_encoder(ParticipantCreate(email=ut.random_email(),
                                               api_key=ut.random_lower_string(32),
                                               first_name=ut.random_lower_string(8),
                                               last_name=ut.random_lower_string(8),
                                               type_name="initial",
-                                              speaker_id=max_id + 1))
+                                              speaker_id=-1))
     r = await async_client.post(f"{settings.API_V1_STR}/users/participants/participant",
                                 headers=admin_token_headers, json=data)
     assert r.status_code == 400
@@ -197,16 +192,11 @@ async def test_update_participant_by_id_existing_email_by_admin(async_client: As
     assert "A user with this email already exists in the system..." in r.json().values()
 
 
-async def test_update_participant_by_id_not_existing_by_admin(async_client: AsyncClient, db_tests: AsyncSession,
+async def test_update_participant_by_id_not_existing_by_admin(async_client: AsyncClient,
                                                               admin_token_headers: dict[str, str]) -> None:
-    # get a not existing participant id
-    db_participants = await crud.participant.get_multi(db_tests)
-    if db_participants:
-        max_id = max([participant.id for participant in db_participants])
-    else:
-        max_id = 0
+
     data = jsonable_encoder(ParticipantUpdate(first_name="Sandra"), exclude_unset=True)
-    r = await async_client.put(f"{settings.API_V1_STR}/users/participants/{max_id + 1}",
+    r = await async_client.put(f"{settings.API_V1_STR}/users/participants/-1",
                                headers=admin_token_headers, json=data)
     assert r.status_code == 404
     assert "A participant user with this id does not exist in the system..." in r.json().values()
@@ -215,14 +205,9 @@ async def test_update_participant_by_id_not_existing_by_admin(async_client: Asyn
 async def test_update_participant_by_id_not_existing_speaker_id_by_admin(async_client: AsyncClient,
                                                                          db_tests: AsyncSession,
                                                                          admin_token_headers: dict[str, str]) -> None:
+
     db_participant = await ut.create_random_participant(db_tests)
-    # get a not existing speaker id
-    db_speakers = await crud.speaker.get_multi(db_tests)
-    if db_speakers:
-        max_id = max([speaker.id for speaker in db_speakers])
-    else:
-        max_id = 0
-    data = jsonable_encoder(ParticipantUpdate(first_name="Sandra", speaker_id=max_id + 1), exclude_unset=True)
+    data = jsonable_encoder(ParticipantUpdate(first_name="Sandra", speaker_id=-1), exclude_unset=True)
     r = await async_client.put(f"{settings.API_V1_STR}/users/participants/{db_participant.id}",
                                headers=admin_token_headers, json=data)
     assert r.status_code == 400

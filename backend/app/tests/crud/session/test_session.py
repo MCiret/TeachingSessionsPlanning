@@ -11,7 +11,7 @@ from app.core.config import settings
 from app.schemas import SessionUpdate, SessionCreate
 from app.schemas import Session as SessionSchema
 from app.models import SessionType, SessionStatus
-import app.tests.utils as ut
+import app.tests.utils_for_testing as ut
 
 # This is the same as using the @pytest.mark.anyio on all test functions in the module
 pytestmark = pytest.mark.anyio

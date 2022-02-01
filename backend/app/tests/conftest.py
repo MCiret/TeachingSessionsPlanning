@@ -10,7 +10,7 @@ from app.db.init_db import initialize_db
 from app.main import app
 from app.api.deps import get_async_db
 from app import models
-from app.tests import utils as ut
+from app.tests import utils_for_testing as ut
 
 engine_tests_db = create_async_engine("postgresql+asyncpg://postgres:postgres_key@localhost/p13_tests_db", future=True)
 AsyncTestsSessionLocal = sessionmaker(class_=AsyncSession, future=True, expire_on_commit=False,

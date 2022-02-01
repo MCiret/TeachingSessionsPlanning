@@ -5,7 +5,7 @@ from app import crud
 from app.core.config import settings
 from app.models import Participant
 from app.schemas import ParticipantCreate, ParticipantUpdate
-from app.tests import utils as ut
+from app.tests import utils_for_testing as ut
 
 
 async def create_random_participant(db: AsyncSession, *, email: str = None, api_key: str = None,

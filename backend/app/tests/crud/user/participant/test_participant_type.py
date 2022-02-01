@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import crud
 from app.schemas import ParticipantTypeCreate, ParticipantTypeUpdate
-from app.tests import utils as ut
+from app.tests import utils_for_testing as ut
 
 # This is the same as using the @pytest.mark.anyio on all test functions in the module
 pytestmark = pytest.mark.anyio

@@ -7,7 +7,7 @@ from fastapi.encoders import jsonable_encoder
 
 from app.core.config import settings
 from app.utils import from_weekday_int_to_str
-from app.tests import utils as ut
+from app.tests import utils_for_testing as ut
 from app import crud
 from app.schemas import AvailabilityCreate, AvailabilityUpdate
 
@@ -162,16 +162,10 @@ class TestEndpointsAvailabilities:
     async def test_read_availabilities_by_speaker_id_set_not_exists_by_participant(self, async_client: AsyncClient,
                                                                                    db_tests: AsyncSession) -> None:
         participant = await ut.create_random_participant(db_tests)
-        # get a not existing speaker id
-        db_speakers = await crud.speaker.get_multi(db_tests)
-        if db_speakers:
-            max_id = max([speaker.id for speaker in db_speakers])
-        else:
-            max_id = 0
         participant_token_headers = await ut.participant_authentication_token_from_email(client=async_client,
                                                                                          email=participant.email,
                                                                                          db=db_tests)
-        r = await async_client.get(f"{settings.API_V1_STR}/availabilities", params={"speaker_id": max_id + 1},
+        r = await async_client.get(f"{settings.API_V1_STR}/availabilities", params={"speaker_id": -1},
                                    headers=participant_token_headers)
         assert r.status_code == 404
         assert "A speaker with this id does not exist in the system..." in r.json().values()

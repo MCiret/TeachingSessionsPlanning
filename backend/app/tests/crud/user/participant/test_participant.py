@@ -9,7 +9,7 @@ from app.schemas import ParticipantUpdate, ParticipantCreate
 from app.schemas import Participant as ParticipantSchema
 from app.models import ParticipantType, ParticipantStatus
 from app.core.security import verify_password
-from app.tests import utils as ut
+from app.tests import utils_for_testing as ut
 
 # This is the same as using the @pytest.mark.anyio on all test functions in the module
 pytestmark = pytest.mark.anyio

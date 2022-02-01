@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app import crud
 from app.schemas import SpeakerUpdate
 from app.core.security import verify_password
-from app.tests import utils as ut
+from app.tests import utils_for_testing as ut
 from app.models import ParticipantType
 from app.schemas import ParticipantTypeCreate, AvailabilityCreate, SessionCreate
 

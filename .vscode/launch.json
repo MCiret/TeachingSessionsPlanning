@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: FastAPI",
+            "type": "python",
+            "cwd": "/home/marie/Documents/Informatique/Parcours_OC_DA-Python/Projets/Projet-13-Final-Pret_pour_le_feu_d-artifices/TeachingSessionsPlanning_repo/backend/",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "app.main:app", "--reload"
+            ],
+            "jinja": true
+        },
+        {
+            "name": "Tests",
+            "type": "python",
+            "cwd": "/home/marie/Documents/Informatique/Parcours_OC_DA-Python/Projets/Projet-13-Final-Pret_pour_le_feu_d-artifices/TeachingSessionsPlanning_repo/backend/",
+            "request": "launch",
+            "module": "pytest",
+            "args": ["--verbosity", "2", "-rP", "--randomly-dont-reset-seed"],
+            "jinja": true
+        }
+    ]
+}

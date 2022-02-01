@@ -6,7 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from app.core.config import settings
 from app import crud
 from app.schemas import SessionStatusCreate, SessionStatusUpdate
-from app.tests import utils as ut
+from app.tests import utils_for_testing as ut
 
 # This is the same as using the @pytest.mark.anyio on all test functions in the module
 pytestmark = pytest.mark.anyio

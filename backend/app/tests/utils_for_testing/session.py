@@ -6,7 +6,7 @@ from app import crud
 from app.core.config import settings
 from app.schemas import SessionCreate
 from app.models import Session
-from app.tests import utils as ut
+from app.tests import utils_for_testing as ut
 
 
 async def create_random_session(db: AsyncSession, *, date_: dt.date = None, time_: dt.time = None,

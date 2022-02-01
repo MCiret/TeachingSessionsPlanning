@@ -6,7 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from app.core.config import settings
 from app import crud
 from app.schemas import SpeakerCreate, SpeakerUpdate
-from app.tests import utils as ut
+from app.tests import utils_for_testing as ut
 
 # This is the same as using the @pytest.mark.anyio on all test functions in the module
 pytestmark = pytest.mark.anyio
@@ -103,16 +103,10 @@ async def test_update_speaker_by_id_existing_email_by_admin(async_client: AsyncC
     assert "A user with this email already exists in the system..." in r.json().values()
 
 
-async def test_update_speaker_by_id_not_existing_by_admin(async_client: AsyncClient, db_tests: AsyncSession,
+async def test_update_speaker_by_id_not_existing_by_admin(async_client: AsyncClient,
                                                           admin_token_headers: dict[str, str]) -> None:
-    # get a not existing speaker id
-    db_speakers = await crud.speaker.get_multi(db_tests)
-    if db_speakers:
-        max_id = max([speaker.id for speaker in db_speakers])
-    else:
-        max_id = 0
     data = jsonable_encoder(SpeakerUpdate(first_name="Sandra"), exclude_unset=True)
-    r = await async_client.put(f"{settings.API_V1_STR}/users/speaker/{max_id + 1}",
+    r = await async_client.put(f"{settings.API_V1_STR}/users/speaker/-1",
                                headers=admin_token_headers, json=data)
     assert r.status_code == 404
     assert "A speaker user with this id does not exist in the system..." in r.json().values()

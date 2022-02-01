@@ -6,7 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from app.core.config import settings
 from app import crud
 from app.schemas import ParticipantStatusCreate, ParticipantStatusUpdate
-from app.tests import utils as ut
+from app.tests import utils_for_testing as ut
 
 # This is the same as using the @pytest.mark.anyio on all test functions in the module
 pytestmark = pytest.mark.anyio
@@ -90,16 +90,11 @@ async def test_update_participant_status_by_id_by_not_admin(async_client: AsyncC
     assert "The user doesn't have enough privileges" in r.json().values()
 
 
-async def test_update_participant_status_by_id_not_existing_by_admin(async_client: AsyncClient, db_tests: AsyncSession,
+async def test_update_participant_status_by_id_not_existing_by_admin(async_client: AsyncClient,
                                                                      admin_token_headers: dict[str, str]) -> None:
-    # get a not existing participant status id
-    p_status = await crud.participant_status.get_multi(db_tests)
-    if p_status:
-        max_id = max([status.id for status in p_status])
-    else:
-        max_id = 0
+
     data = jsonable_encoder(ParticipantStatusUpdate(name=ut.random_lower_string(10)), exclude_unset=True)
-    r = await async_client.put(f"{settings.API_V1_STR}/users/participants/status/{max_id + 1}",
+    r = await async_client.put(f"{settings.API_V1_STR}/users/participants/status/-1",
                                headers=admin_token_headers, json=data)
     assert r.status_code == 404
     assert "A participant status with this id does not exist in the system..." in r.json().values()
