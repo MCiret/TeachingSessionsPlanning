@@ -1,0 +1,5 @@
+{{ project_name }} - New Account
+Your new account :
+Email : {{ email }}
+
+Use this link {{ link }} to go to dashboard...

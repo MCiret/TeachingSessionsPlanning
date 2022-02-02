@@ -35,7 +35,7 @@ async def create_participant(
     current_user: models.User = Depends(deps.get_current_active_speaker_or_admin_user),
 ) -> Any:
     """
-    Create new participant user and send him/her an email.
+    Create new participant user and send him/her an email. # TODO
     **Allowed for speaker or admin user only.**
     """
     db_participant = await crud.user.get_by_email(db, email=participant_in.email)

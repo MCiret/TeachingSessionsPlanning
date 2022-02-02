@@ -21,6 +21,7 @@ httpx = "*"
 pytest-randomly = "*"
 pytest-cov = "*"
 pytest-mock = "*"
+jinja2 = "*"
 
 [dev-packages]
 flake8 = "*"

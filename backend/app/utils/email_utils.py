@@ -1,5 +1,11 @@
+import smtplib, ssl
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from jinja2 import Environment, FileSystemLoader
 
-# FastAPI project version => to replace... follow Real Python tuto using smtplib + ssl/tls..
+from app.core.config import settings
+
+# FastAPI cookiecutter project version => to adapt...
 import logging
 import datetime as dt
 from pathlib import Path
@@ -11,97 +17,55 @@ from jose import jwt
 
 from app.core.config import settings
 
-def send_email(
-    email_to: str,
-    subject_template: str = "",
-    html_template: str = "",
-    environment: dict[str, Any] = {},
-) -> None:
+jinja_env = Environment(loader=FileSystemLoader(Path(settings.EMAIL_TEMPLATES_DIR)))
+
+
+def send_email(email_to: str, subject_template: str = "", html_template: str = "", text_template: str = "") -> None:
     assert settings.EMAILS_ENABLED, "no provided configuration for email variables"
-    message = emails.Message(
-        subject=JinjaTemplate(subject_template),
-        html=JinjaTemplate(html_template),
-        mail_from=(settings.EMAILS_FROM_NAME, settings.EMAILS_FROM_EMAIL),
-    )
-    smtp_options = {"host": settings.SMTP_HOST, "port": settings.SMTP_PORT}
-    if settings.SMTP_TLS:
-        smtp_options["tls"] = True
-    if settings.SMTP_USER:
-        smtp_options["user"] = settings.SMTP_USER
-    if settings.SMTP_PASSWORD:
-        smtp_options["password"] = settings.SMTP_PASSWORD
-    response = message.send(to=email_to, render=environment, smtp=smtp_options)
-    logging.info(f"send email result: {response}")
+    message = MIMEMultipart("alternative")
+    message['Subject'] = subject_template
+    message['From'] = settings.EMAILS_FROM_EMAIL
+    message['To'] = email_to
 
+    text_body = MIMEText(text_template, "plain")
+    html_body = MIMEText(html_template, "html")
+    # Add HTML/plain-text parts to MIMEMultipart message
+    # The email client will try to render the last part first
+    message.attach(text_body)
+    message.attach(html_body)
 
-def send_test_email(email_to: str) -> None:
-    project_name = settings.PROJECT_NAME
-    subject = f"{project_name} - Test email"
-    with open(Path(settings.EMAIL_TEMPLATES_DIR) / "test_email.html") as f:
-        template_str = f.read()
-    send_email(
-        email_to=email_to,
-        subject_template=subject,
-        html_template=template_str,
-        environment={"project_name": settings.PROJECT_NAME, "email": email_to},
-    )
-
-
-def send_reset_password_email(email_to: str, email: str, token: str) -> None:
-    project_name = settings.PROJECT_NAME
-    subject = f"{project_name} - Password recovery for user {email}"
-    with open(Path(settings.EMAIL_TEMPLATES_DIR) / "reset_password.html") as f:
-        template_str = f.read()
-    server_host = settings.SERVER_HOST
-    link = f"{server_host}/reset-password?token={token}"
-    send_email(
-        email_to=email_to,
-        subject_template=subject,
-        html_template=template_str,
-        environment={
-            "project_name": settings.PROJECT_NAME,
-            "username": email,
-            "email": email_to,
-            "valid_hours": settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS,
-            "link": link,
-        },
-    )
-
-
-def send_new_account_email(email_to: str, username: str, password: str) -> None:
-    project_name = settings.PROJECT_NAME
-    subject = f"{project_name} - New account for user {username}"
-    with open(Path(settings.EMAIL_TEMPLATES_DIR) / "new_account.html") as f:
-        template_str = f.read()
-    link = settings.SERVER_HOST
-    send_email(
-        email_to=email_to,
-        subject_template=subject,
-        html_template=template_str,
-        environment={
-            "project_name": settings.PROJECT_NAME,
-            "username": username,
-            "password": password,
-            "email": email_to,
-            "link": link,
-        },
-    )
-
-
-def generate_password_reset_token(email: str) -> str:
-    delta = dt.timedelta(hours=settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS)
-    now = dt.datetime.utcnow()
-    expires = now + delta
-    exp = expires.timestamp()
-    encoded_jwt = jwt.encode(
-        {"exp": exp, "nbf": now, "sub": email}, settings.SECRET_KEY, algorithm="HS256",
-    )
-    return encoded_jwt
-
-
-def verify_password_reset_token(token: str) -> str | None:
+    # Create a secure SSL context
+    context = ssl.create_default_context()
+    # Using .starttls() with a Gmail Account set for Development
     try:
-        decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        return decoded_token["email"]
-    except jwt.JWTError:
-        return None
+        server = smtplib.SMTP(settings.SMTP_HOST, settings.START_TLS_PORT)
+        server.starttls(context=context) # Secure the connection
+        server.login(settings.EMAILS_FROM_EMAIL, settings.SMTP_PASSWORD)
+        server.sendmail(settings.EMAILS_FROM_EMAIL, email_to, message.as_string())
+    except Exception as e:
+        raise e
+    finally:
+        server.quit()
+
+    # Setting up a Local SMTP Server
+    # $ sudo python -m smtpd -c DebuggingServer -n localhost:1025
+    try:
+        local_server = smtplib.SMTP("localhost", settings.SMTP_LOCAL_PORT)
+        local_server.sendmail(settings.EMAILS_FROM_EMAIL, "fake@mail.com", message.as_string())
+    except Exception as e:
+        # Print any error messages to stdout
+        raise e
+    finally:
+        local_server.quit()
+
+
+def send_new_account_email(email_to: str) -> None:
+    data = {
+        "project_name": settings.PROJECT_NAME,
+        "subject": f"{settings.PROJECT_NAME} - New account for user with email {email_to}",
+        "email_to": email_to,
+        "link": settings.API_DOCS_LINK
+    }
+    html_template = jinja_env.get_template('new_account.html').render(**data)
+    text_template = jinja_env.get_template('new_account.txt').render(**data)
+    send_email(email_to, data["subject"], html_template, text_template)
