@@ -17,20 +17,20 @@ def test_send_email_wrong_recipient_address() -> None:
 def test_send_email_wrong_host_login_user(mocker) -> None:
     mocker.patch.object(settings, 'EMAILS_FROM_EMAIL', "wrong login user")
     with pytest.raises(Exception) as e:
-        send_email("", "My test mail subject", "html_template", "text_template")
+        send_email(settings.TESTS_EMAIL, "My test mail subject", "html_template", "text_template")
     assert e.type == SMTPAuthenticationError
 
 
 def test_send_email_wrong_login_password(mocker) -> None:
     mocker.patch.object(settings, 'SMTP_PASSWORD', "wrong password")
     with pytest.raises(Exception) as e:
-        send_email("", "My test mail subject", "html_template", "text_template")
+        send_email(settings.TESTS_EMAIL, "My test mail subject", "html_template", "text_template")
     assert e.type == SMTPAuthenticationError
 
 
 def test_send_new_account_email(mocker) -> None:
     jinja_env = Environment()
-    email_to = ""
+    email_to = settings.TESTS_EMAIL
     data = {
         "project_name": settings.PROJECT_NAME,
         "subject": f"{settings.PROJECT_NAME} - New account for user with email {email_to}",
@@ -47,11 +47,11 @@ def test_send_new_account_email(mocker) -> None:
 
     mock_send_email = mocker.patch('app.utils.email_utils.send_email')
     send_new_account_email(email_to)
-    mock_send_email.assert_called_with("", data["subject"], html_template, text_template)
+    mock_send_email.assert_called_with(settings.TESTS_EMAIL, data["subject"], html_template, text_template)
 
 
 def test_send_new_account_email_not_existing_template_raises_exception(mocker) -> None:
     mocker.patch.object(jinja_env, 'loader', FileSystemLoader(Path("wrong path")))
     with pytest.raises(Exception) as e:
-        send_new_account_email("")
+        send_new_account_email(settings.TESTS_EMAIL)
     assert e.type == TemplateNotFound

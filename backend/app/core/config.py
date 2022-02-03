@@ -81,6 +81,8 @@ class Settings(BaseSettings):
             and values.get("EMAILS_FROM_EMAIL")
         )
 
+    TESTS_EMAIL: EmailStr = os.getenv("DEV_GMAIL_ADDRESS")
+
     class Config:
         case_sensitive = True
 
