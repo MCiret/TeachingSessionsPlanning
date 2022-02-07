@@ -19,7 +19,7 @@ async def get_async_db():
         yield async_session
 
 
-async def get_current_user(
+async def check_jwt_and_get_current_user(
     db: AsyncSession = Depends(get_async_db), token: str = Depends(reusable_oauth2)
 ) -> models.User:
     """
@@ -42,7 +42,7 @@ async def get_current_user(
 
 
 async def get_current_active_user(
-    current_user: models.User = Depends(get_current_user),
+    current_user: models.User = Depends(check_jwt_and_get_current_user),
 ) -> models.User:
     if not await crud.user.is_active(current_user):
         raise HTTPException(status_code=400, detail="Inactive user")
@@ -66,7 +66,7 @@ async def get_current_active_speaker_or_participant_user(
 
 
 async def get_current_active_admin_user(
-    current_user: models.User = Depends(get_current_user),
+    current_user: models.User = Depends(check_jwt_and_get_current_user),
 ) -> models.User:
     if not await crud.user.is_admin(current_user):
         raise HTTPException(
@@ -76,7 +76,7 @@ async def get_current_active_admin_user(
 
 
 async def get_current_active_speaker_user(
-    current_user: models.User = Depends(get_current_user),
+    current_user: models.User = Depends(check_jwt_and_get_current_user),
 ) -> models.User:
     if not await crud.user.is_speaker(current_user):
         raise HTTPException(

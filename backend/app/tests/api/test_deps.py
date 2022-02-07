@@ -17,7 +17,7 @@ async def test_get_current_user_jwt_ok_and_user_found(mocker):
         }
     mock_crud_user_get = mocker.patch('app.crud.user.get')
     mock_crud_user_get.return_value = "user found and authenticate!"
-    assert await deps.get_current_user() == "user found and authenticate!"
+    assert await deps.check_jwt_and_get_current_user() == "user found and authenticate!"
     mock_decode.assert_called_once()
     mock_crud_user_get.assert_called_once()
 
@@ -31,7 +31,7 @@ async def test_get_current_user_jwt_validation_error_raises_HTTPException(mocker
         }
     mock_crud_user_get = mocker.patch('app.crud.user.get')
     with pytest.raises(HTTPException) as he:
-        await deps.get_current_user()
+        await deps.check_jwt_and_get_current_user()
     assert "Could not validate credentials" in str(he.getrepr())
     mock_decode.assert_called_once()
     mock_crud_user_get.assert_not_called()
@@ -42,7 +42,7 @@ async def test_get_current_user_jwt_JWTError_raises_HTTPException(mocker):
     mock_decode.side_effect = jose.jwt.JWTError
     mock_crud_user_get = mocker.patch('app.crud.user.get')
     with pytest.raises(HTTPException) as he:
-        await deps.get_current_user()
+        await deps.check_jwt_and_get_current_user()
     assert "Could not validate credentials" in str(he.getrepr())
     mock_decode.assert_called_once()
     mock_crud_user_get.assert_not_called()
@@ -58,7 +58,7 @@ async def test_get_current_user_jwt_ok_but_user_not_found_raises_HTTPException(m
     mock_crud_user_get = mocker.patch('app.crud.user.get')
     mock_crud_user_get.return_value = False
     with pytest.raises(HTTPException) as he:
-        await deps.get_current_user()
+        await deps.check_jwt_and_get_current_user()
     assert "User not found" in str(he.getrepr())
     mock_decode.assert_called_once()
     mock_crud_user_get.assert_called_once()

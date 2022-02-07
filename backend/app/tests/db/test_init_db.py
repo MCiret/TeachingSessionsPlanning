@@ -1,6 +1,5 @@
-from typing import Generator
-
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 import pytest
 
 from app import crud
@@ -20,9 +19,9 @@ async def test_initialize_db_empty_db(db_tests: AsyncSession) -> None:
 
     try:
         await initialize_db(db_tests)
-    except:
+    except IntegrityError:
         # should not but in case this avoid tests crash(es)...
-        raise AssertionError("function initialize_db() raises an exception during test...")
+        raise AssertionError("function initialize_db() raises an Integrity exception during test...")
 
     assert await crud.admin.get_by_email(db_tests, email=settings.FIRST_SUPERUSER_EMAIL)
 
@@ -35,7 +34,7 @@ async def test_initialize_db_empty_db(db_tests: AsyncSession) -> None:
     db_p_status_names = [db_ps.name for db_ps in await crud.participant_status.get_multi(db_tests)]
     assert db_p_status_names and len(db_p_status_names) >= len(p_status_names)
     p_status_comparison = [db_ps_name for db_ps_name, ps_name in zip(db_p_status_names, p_status_names)
-                          if db_ps_name == ps_name]
+                           if db_ps_name == ps_name]
     assert p_status_comparison and len(p_status_comparison) == len(p_status_names)
 
     db_s_type_names = [db_st.name for db_st in await crud.session_type.get_multi(db_tests)]
@@ -47,5 +46,5 @@ async def test_initialize_db_empty_db(db_tests: AsyncSession) -> None:
     db_s_status_names = [db_ss.name for db_ss in await crud.session_status.get_multi(db_tests)]
     assert db_s_status_names and len(db_s_status_names) >= len(s_status_names)
     s_status_comparison = [db_ss_name for db_ss_name, ss_name in zip(db_s_status_names, s_status_names)
-                          if db_ss_name == ss_name]
+                           if db_ss_name == ss_name]
     assert s_status_comparison and len(s_status_comparison) == len(s_status_names)

@@ -1,17 +1,22 @@
 import os, secrets
+from pathlib import Path
 from typing import Any
 
-from pydantic import AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn, validator
+from pydantic import AnyHttpUrl, BaseSettings, EmailStr, PostgresDsn, validator
+from fastapi.templating import Jinja2Templates  # like Environment from Jinja2
 
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "TeachingSessionsPlanning"
     API_V1_STR: str = "/api/v1"  # urls start with /api/v1
+    TEMPLATES_DIR: str = "app/templates"
+    STATIC_DIR: str = "/static"
     SECRET_KEY: str = os.getenv("FASTAPI_SECRET_KEY")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # = 8 days
     SERVER_NAME: str = None
     SERVER_HOST: AnyHttpUrl = "http://127.0.0.1:8000"
-    API_DOCS_LINK : AnyHttpUrl = SERVER_HOST+"/docs"
+    API_LINK: Path = Path(SERVER_HOST + API_V1_STR)
+    API_DOCS_LINK: Path = Path(SERVER_HOST) / "docs"
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
     # e.g: '["http://localhost", "http://localhost:4200", "http://localhost:3000", \
     # "http://localhost:8080", "http://local.dockertoolbox.tiangolo.com"]'
@@ -47,7 +52,7 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER_FIRST_NAME = "admin first name"
     FIRST_SUPERUSER_LAST_NAME = "admin last name"
     FIRST_SUPERUSER_EMAIL: EmailStr = "admin@example.com"
-    FIRST_SUPERUSER_PASSWORD: str = secrets.token_urlsafe(32)
+    FIRST_SUPERUSER_PASSWORD: str = "mysupersecretadminapikey"
 
     EMAIL_TEST_SPEAKER: EmailStr = "test_spk@example.com"  # type: ignore
     EMAIL_TEST_PARTICIPANT: EmailStr = "test_part@example.com"  # type: ignore
@@ -69,8 +74,8 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str = os.getenv("DEV_GMAIL_PWD")
     EMAILS_FROM_EMAIL: EmailStr = os.getenv("DEV_GMAIL_ADDRESS")
 
-    EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
-    EMAIL_TEMPLATES_DIR: str = "app/email-templates"
+    EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 12
+    EMAIL_TEMPLATES_DIR: Path = Path(TEMPLATES_DIR) / "email-templates/"
     EMAILS_ENABLED: bool = False
 
     @validator("EMAILS_ENABLED", pre=True)
@@ -88,3 +93,5 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+jinja_templates = Jinja2Templates(directory=Path(settings.TEMPLATES_DIR))

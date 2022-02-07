@@ -1,0 +1,9 @@
+{{ project_name }} - API Key Recovery
+
+A request has been sent to recover the API Key for user having email : {{ email_to }}
+
+---> Open this link to reset your API Key : {{ link }}
+
+The reset API Key link will expire in {{ expire_link_hr }} hours.
+
+If you did not request an API Key recovery, just ignore this email..

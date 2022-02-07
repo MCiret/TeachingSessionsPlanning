@@ -1,0 +1,25 @@
+<html>
+<head>
+    <title>API Key reset</title>
+    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+</head>
+<body>
+    <h1>{{ project_name }} API Key resetting</h1>
+    <form action="{{ url_for('reset_api_key') }}" method="post">
+        <div>
+            Email : {{ email_to }}
+        </div>
+        <div>
+            <label for="new_api_key">Paste your new API Key :</label>
+            <input type="text" id="new_api_key" name="new_api_key">
+        </div>
+        <div>
+            Token (temp to check): {{ token }}<br>
+            <input type="hidden" id="apikey_reset_token" name="apikey_reset_token" value="{{ token }}">
+        </div>
+        <div class="button">
+            <br><button type="submit">Reset API Key</button>
+        </div>
+    </form>
+</body>
+</html>
